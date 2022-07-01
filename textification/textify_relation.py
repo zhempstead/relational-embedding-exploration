@@ -10,7 +10,7 @@ import numpy as np
 import json
 import random
 
-from relational_embedder.data_prep import data_prep_utils as dpu
+import data_prep_utils as dpu
 
 RELATION_STRATEGY = ['row_and_col', 'row', 'col', 'alex']
 INTEGER_STRATEGY = ['skip', 'stringify', 'augment', "quantize"]

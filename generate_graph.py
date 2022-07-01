@@ -5,7 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 import networkx as nx
 import utils
-from relational_embedder.data_prep import data_prep_utils as dpu
+import data_prep_utils as dpu
 import textification.textify_relation as tr
 from token_dict import TokenDict
 
