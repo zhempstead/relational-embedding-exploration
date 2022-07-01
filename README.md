@@ -27,6 +27,7 @@ To setup the environment, run,
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
+pip install -e .
 ```  
 
 The Python version we are using is 3.6.13 and pip version is 21.0.1.

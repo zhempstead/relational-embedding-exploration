@@ -57,6 +57,9 @@ data/*
 # Virtualenv
 venv/*
 
+# setup.py stuff
+*.egg-info
+
 # Node2Vec 
 *.edgelist
 *.emb

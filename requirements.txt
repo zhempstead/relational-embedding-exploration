@@ -6,5 +6,4 @@ seaborn==0.11.1
 pandas==1.1.5
 scikit-learn==0.24.1
 tensorflow==2.4.1
-hydra==1.2
-cython
+hydra-core==1.2
