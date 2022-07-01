@@ -24,6 +24,8 @@ All of the following used default parameters that could be altered at the user's
 ## Setup 
 To setup the environment, run, 
 ```
+virtualenv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```  
 
