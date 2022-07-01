@@ -1,0 +1,8 @@
+defaults:
+  - dataset: sample
+  - tokenization: leva
+  - _self_
+
+hydra:
+  job:
+    chdir: true
