@@ -1,6 +1,6 @@
 defaults:
   - dataset: sample
-  - tokenization: leva
+  - normalization: leva
   - _self_
 
 hydra:

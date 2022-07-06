@@ -60,6 +60,9 @@ venv/*
 # setup.py stuff
 *.egg-info
 
+# Hydra output directory
+outputs/
+
 # Node2Vec 
 *.edgelist
 *.emb
