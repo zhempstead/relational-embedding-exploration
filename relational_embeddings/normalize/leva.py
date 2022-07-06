@@ -61,7 +61,6 @@ def get_strategy(df):
     return strategy
 
 def normalize_df(df, strategy, cfg):
-    import pdb; pdb.set_trace()
     df = quantize(df, strategy, cfg)
     for col in df.columns:
         lowercase_removepunct(df, col)
