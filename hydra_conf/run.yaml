@@ -1,6 +1,7 @@
 defaults:
   - dataset: sample
   - normalization: leva
+  - table2graph: leva
   - _self_
 
 hydra:

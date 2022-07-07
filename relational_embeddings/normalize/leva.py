@@ -1,10 +1,13 @@
-import json
 from collections import defaultdict 
+import json
+import re
 
 import numpy as np 
 import pandas as pd
 
 from relational_embeddings.utils import all_data_files_in_path
+
+DATE_PATTERN = re.compile("(\d+/\d+/\d+)")
 
 def leva_normalize(datadir, outdir, cfg):
     '''
@@ -80,16 +83,48 @@ def quantize(df, strategy, cfg):
         if df[col].dtype not in [np.int64, np.int32, np.int64, np.float, np.int, np.float16, np.float32, np.float64]:
             continue 
         
+        augment = True
+
+        if strategy[col]["int"] == "skip":
+            df.drop(col, axis=1, inplace=True)
+            continue
+        if strategy[col]["int"] == "stringify":
+            quantized_col = df[col]
+            augment = False
+        if strategy[col]["int"] == "augment":
+            quantized_col = df[col]
         if strategy[col]["int"] == "eqw_quantize":
             bins = [np.percentile(df[col], i * bin_percentile) for i in range(num_bins)]
-            df[col] = np.digitize(df[col], bins)
+            quantized_col = np.digitize(df[col], bins)
         if strategy[col]["int"] == "eqh_quantize":
             bins = [i * (df[col].max() - df[col].min()) / num_bins for i in range(num_bins)]
-            df[col] = np.digitize(df[col], bins)
+            quantized_col = np.digitize(df[col], bins)
+
+        quantized_col = quantized_col.astype(str)
+
+        if augment:
+            # Special symbol to tell apart augmentation from space
+            quantized_col = str(col) + "_<#>_" + quantized_col.astype(str)
+
+        # Values that were originally null get put in the highest bin
+        # Instead, set them to None
+        quantized_col[pd.isnull(df[col])] = None
+
+        df[col] = quantized_col
     return df
 
 def lowercase_removepunct(df, col):
+    '''
+    Also normalizes null values to None
+    '''
     df[col] = df[col].astype(str)
+
+    df.loc[pd.isnull(df[col]), col] = None
+    df[col] = df[col].replace("", None)
+    df[col] = df[col].replace("\\N", None)
+    # Filter out dates, for some reason
+    df.loc[df[col].str.match(DATE_PATTERN), col] = None
+
     df[col] = df[col].str.lower()
     df[col] = df[col].str.replace(',', ' ')
     df[col] = df[col].str.replace('  ', ' ')

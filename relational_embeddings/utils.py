@@ -5,4 +5,5 @@ from os.path import isfile, join
 
 def all_data_files_in_path(path):
     return [f for f in path.iterdir()
-            if f.is_file() and f.name not in [".DS_Store", "base.csv"]]
+            if f.is_file() and \
+               f.name not in [".DS_Store", "base.csv", "strategy.txt"]]
