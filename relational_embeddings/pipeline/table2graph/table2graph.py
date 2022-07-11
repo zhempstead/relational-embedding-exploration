@@ -17,6 +17,3 @@ def table2graph(cfg, outdir, indir=None):
       raise ValueError("Unrecognized table2graph method '{cfg.table2graph.method}'")
     
     print(f"Done converting to graph! Output at '{outdir}'")
-
-if __name__ == '__main__':
-    table2graph()

@@ -1,0 +1,10 @@
+method: node2vec
+#dimensions: ${embedding.dimensions}
+walk_length: 40 # Length of walk per source
+num_walks: 10
+#window_size: 10 # Context size for optimization
+#iter: 10 # Number of epochs in SGD
+#workers: 16 # Number of parallel workers
+p: 1 # Return hyperparameter
+q: 1 # Inout hyperparameter
+weighted: False # If false, treat all graph weights as 1

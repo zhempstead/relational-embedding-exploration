@@ -2,6 +2,7 @@ defaults:
   - dataset: sample
   - normalize: leva
   - table2graph: leva
+  - graph2text: node2vec
   - _self_
   - pipeline: single
 
