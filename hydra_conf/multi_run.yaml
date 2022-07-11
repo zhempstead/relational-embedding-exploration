@@ -1,9 +1,12 @@
 defaults:
   - dataset: sample
-  - normalization: leva
+  - normalize: leva
   - table2graph: leva
   - _self_
+  - pipeline: multi
+  - override hydra/sweeper: pipeline
 
 hydra:
   job:
     chdir: true
+  mode: MULTIRUN

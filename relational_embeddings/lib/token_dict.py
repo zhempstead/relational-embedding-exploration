@@ -45,7 +45,6 @@ class TokenDict:
     def getTokenForNum(self, num):
         num = str(num)
         if num not in self.id2token.keys():
-            import pdb; pdb.set_trace()
             return None
         else:
             return self.id2token[num]

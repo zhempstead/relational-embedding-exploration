@@ -1,0 +1,10 @@
+# @package _global_
+hydra:
+  sweep:
+    subdir: ${pipeline_subdir}
+  sweeper:
+    pipelines:
+      - [normalize, table2graph]
+    stage_variants:
+      normalize: [leva]
+      table2graph: [leva]

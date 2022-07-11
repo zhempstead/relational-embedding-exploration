@@ -1,17 +1,13 @@
 from pathlib import Path
 
-import hydra
-
 from relational_embeddings.pipeline.table2graph.leva import leva_table2graph
 
-@hydra.main(version_base=None, config_path='../../../hydra_conf', config_name='run')
-def table2graph(cfg):
+def table2graph(cfg, outdir, indir=None):
     '''
     Convert normalized input tables to graph
     '''
-    indir = Path.cwd() / 'normalize'
-    outdir = Path.cwd() / 'graph'
-    outdir.mkdir()
+    if indir is None:
+      indir = outdir.parent
 
     print(f"Converting to graph using '{cfg.table2graph.method}' method...")
 

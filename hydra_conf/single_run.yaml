@@ -1,0 +1,10 @@
+defaults:
+  - dataset: sample
+  - normalize: leva
+  - table2graph: leva
+  - _self_
+  - pipeline: single
+
+hydra:
+  job:
+    chdir: true
