@@ -3,7 +3,7 @@ from pathlib import Path
 import hydra
 import pandas as pd
 
-from relational_embeddings.utils import all_data_files_in_path
+from relational_embeddings.lib.utils import all_data_files_in_path
 
 @hydra.main(version_base=None, config_path='../hydra_conf', config_name='preprocess')
 def preprocess(cfg):

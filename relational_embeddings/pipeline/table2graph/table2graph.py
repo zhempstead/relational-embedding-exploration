@@ -2,9 +2,9 @@ from pathlib import Path
 
 import hydra
 
-from relational_embeddings.table2graph.leva import leva_table2graph
+from relational_embeddings.pipeline.table2graph.leva import leva_table2graph
 
-@hydra.main(version_base=None, config_path='../../hydra_conf', config_name='run')
+@hydra.main(version_base=None, config_path='../../../hydra_conf', config_name='run')
 def table2graph(cfg):
     '''
     Convert normalized input tables to graph

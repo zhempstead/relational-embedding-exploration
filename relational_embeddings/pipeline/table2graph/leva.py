@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from relational_embeddings.token_dict import TokenDict
-from relational_embeddings.utils import all_data_files_in_path
+from relational_embeddings.lib.token_dict import TokenDict
+from relational_embeddings.lib.utils import all_data_files_in_path
 
 NUM_THRESHOLD = 5000
 DISTINCT_THRESHOLD = 5

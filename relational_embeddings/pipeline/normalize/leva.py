@@ -5,7 +5,7 @@ import re
 import numpy as np 
 import pandas as pd
 
-from relational_embeddings.utils import all_data_files_in_path
+from relational_embeddings.lib.utils import all_data_files_in_path
 
 DATE_PATTERN = re.compile("(\d+/\d+/\d+)")
 

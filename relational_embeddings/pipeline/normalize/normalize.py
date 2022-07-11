@@ -3,14 +3,14 @@ from pathlib import Path
 import hydra
 from hydra.utils import get_original_cwd
 
-from relational_embeddings.normalize.leva import leva_normalize
+from relational_embeddings.pipeline.normalize.leva import leva_normalize
 
-@hydra.main(version_base=None, config_path='../../hydra_conf', config_name='run')
+@hydra.main(version_base=None, config_path='../../../hydra_conf', config_name='run')
 def normalize(cfg):
     '''
     Normalize input tables
     '''
-    datadir = (Path(get_original_cwd()) / __file__).parent.parent.parent / 'data' / cfg.dataset.name
+    datadir = (Path(get_original_cwd()) / __file__).parent.parent.parent.parent / 'data' / cfg.dataset.name
     # CWD set by hydra
     outdir = Path.cwd() / 'normalize'
     outdir.mkdir()
