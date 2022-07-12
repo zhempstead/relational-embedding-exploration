@@ -7,16 +7,12 @@ Aditya Grover and Jure Leskovec
 Knowledge Discovery and Data Mining (KDD), 2016
 '''
 
-import argparse
 from collections import defaultdict
 import random
-import time
 
-from gensim.models import Word2Vec
 import networkx as nx
-import numpy as np
 from numpy.random import choice
-import pandas as pd
+#import pandas as pd
 from tqdm import tqdm
 
 def node2vec_graph2text(indir, outdir, cfg):
@@ -50,15 +46,6 @@ def read_graph(infile, weighted):
       G[edge[0]][edge[1]]['weight'] = 1
   G = G.to_undirected()
   return G
-
-def learn_embeddings(walks):
-  '''
-  Learn embeddings by optimizing the Skipgram objective using SGD.
-  '''
-  model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
-  model.wv.save_word2vec_format(args.output)
-  print("Model trained and saved under {}".format(args.output))
-  return
 
 def main(args):
   '''

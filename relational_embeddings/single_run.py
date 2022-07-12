@@ -5,11 +5,13 @@ import hydra
 from relational_embeddings.pipeline.normalize import normalize
 from relational_embeddings.pipeline.table2graph import table2graph
 from relational_embeddings.pipeline.graph2text import graph2text
+from relational_embeddings.pipeline.text2model import text2model
 
 STAGE2FUNC = {
     'normalize': normalize,
     'table2graph': table2graph,
     'graph2text': graph2text,
+    'text2model': text2model,
 }
 
 @hydra.main(version_base=None, config_path='../hydra_conf', config_name='single_run')

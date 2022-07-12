@@ -1,8 +1,10 @@
 defaults:
   - dataset: sample
+  - embedding: small
   - normalize: leva
   - table2graph: leva
   - graph2text: node2vec
+  - text2model: word2vec
   - _self_
   - pipeline: single
 
