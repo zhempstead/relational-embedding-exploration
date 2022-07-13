@@ -1,2 +1,4 @@
 name: sample
 target_column: money
+test_size: 0.2
+random_seed: 10

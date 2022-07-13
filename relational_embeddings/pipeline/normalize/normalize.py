@@ -2,6 +2,7 @@ from pathlib import Path
 
 from hydra.utils import get_original_cwd
 
+from relational_embeddings.lib.utils import dataset_dir
 from relational_embeddings.pipeline.normalize.leva import leva_normalize
 
 def normalize(cfg, outdir, indir=None):
@@ -9,7 +10,7 @@ def normalize(cfg, outdir, indir=None):
     Normalize input tables
     '''
     if indir is None:
-      indir = (Path(get_original_cwd()) / __file__).parent.parent.parent.parent / 'data' / cfg.dataset.name
+      indir = dataset_dir(cfg.dataset.name)
 
     print(f"Normalizing using '{cfg.normalize.method}' method...")
 
