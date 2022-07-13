@@ -15,5 +15,8 @@ def graph2text(cfg, outdir, indir=None):
       node2vec_graph2text(indir, outdir, cfg.graph2text)
     else:
       raise ValueError("Unrecognized graph2text method '{cfg.graph2text.method}'")
+
+    (outdir / 'word_dict').symlink_to(indir / 'node_dict')
+    (outdir / 'word_types').symlink_to(indir / 'node_types')
     
     print(f"Done converting to text! Output at '{outdir}'")
