@@ -10,7 +10,7 @@ def normalize(cfg, outdir, indir=None):
     Normalize input tables
     '''
     if indir is None:
-      indir = dataset_dir(cfg.dataset.name)
+      indir = dataset_dir(cfg.dataset.name) / 'train_embeddings'
 
     print(f"Normalizing using '{cfg.normalize.method}' method...")
 

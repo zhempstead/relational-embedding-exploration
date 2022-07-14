@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from relational_embeddings.lib.utils import make_symlink
 from relational_embeddings.pipeline.graph2text.node2vec import node2vec_graph2text
 
 def graph2text(cfg, outdir, indir=None):
@@ -16,7 +17,7 @@ def graph2text(cfg, outdir, indir=None):
     else:
       raise ValueError("Unrecognized graph2text method '{cfg.graph2text.method}'")
 
-    (outdir / 'word_dict').symlink_to(indir / 'node_dict')
-    (outdir / 'word_types').symlink_to(indir / 'node_types')
+    make_symlink(indir / 'node_dict', outdir / 'word_dict')
+    make_symlink(indir / 'node_types', outdir / 'word_types')
     
     print(f"Done converting to text! Output at '{outdir}'")

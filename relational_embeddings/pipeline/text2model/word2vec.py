@@ -10,6 +10,8 @@ from gensim.models import Word2Vec
 
 from omegaconf import OmegaConf
 
+from relational_embeddings.lib.utils import make_symlink
+
 def word2vec_text2model(indir, outdir, cfg):
   infile = indir / 'text.txt'
   outfile = outdir / 'embeddings'
@@ -19,7 +21,7 @@ def word2vec_text2model(indir, outdir, cfg):
   model = Word2Vec(text, size=cfg.dimensions, window=cfg.window_size, min_count=0, sg=1, workers=cfg.workers, iter=cfg.iter)
   model.wv.save_word2vec_format(outfile)
 
-  (outdir / 'word_dict').symlink_to(indir / 'word_dict')
+  make_symlink(indir / 'word_dict', outdir / 'word_dict')
 
   model_cnf = OmegaConf.create({'model_type': 'word2vec'})
   word_types = OmegaConf.load(indir / 'word_types')

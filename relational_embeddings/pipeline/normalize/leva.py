@@ -5,7 +5,7 @@ import re
 import numpy as np 
 import pandas as pd
 
-from relational_embeddings.lib.utils import all_data_files_in_path
+from relational_embeddings.lib.utils import all_csv_in_path
 
 DATE_PATTERN = re.compile("(\d+/\d+/\d+)")
 
@@ -17,19 +17,26 @@ def leva_normalize(datadir, outdir, cfg):
     - Either single or multiple tokens per value depending on column grain size
     '''
     strategies = dict()
-    for path in all_data_files_in_path(datadir):
-        df = pd.read_csv(path, encoding = 'latin1', sep=',', low_memory=False)
+    for infile in all_csv_in_path(datadir):
+        df = pd.read_csv(infile, encoding = 'latin1', sep=',', low_memory=False)
+        outfile = get_outfile(infile, outdir)
 
         strategy = get_strategy(df)
-        strategies[path.name] = strategy
+        strategies[outfile.name] = strategy
 
         df = normalize_df(df, strategy, cfg)
 
-        df.to_csv(outdir / path.name, index=False)
+        df.to_csv(outfile, index=False)
 
     # Write strategies
     with open(outdir / 'strategy.txt', 'w') as json_file:
         json.dump(strategies, json_file, indent=4)
+
+def get_outfile(infile, outdir):
+    name = infile.name
+    if name.startswith('base'):
+      return outdir / 'base.csv'
+    return outdir / name
 
 def get_strategy(df):
     '''
