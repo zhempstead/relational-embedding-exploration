@@ -3,7 +3,7 @@ import pickle
 
 class TokenDict:
     def __init__(self, path=None):
-        # token -> numerical id: 
+        # token -> numerical id:
         # string -> string
         if path is None:
             self.token2id = dict()

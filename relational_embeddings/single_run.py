@@ -8,25 +8,27 @@ from relational_embeddings.pipeline.graph2text import graph2text
 from relational_embeddings.pipeline.text2model import text2model
 
 STAGE2FUNC = {
-    'normalize': normalize,
-    'table2graph': table2graph,
-    'graph2text': graph2text,
-    'text2model': text2model,
+    "normalize": normalize,
+    "table2graph": table2graph,
+    "graph2text": graph2text,
+    "text2model": text2model,
 }
 
-@hydra.main(version_base=None, config_path='../hydra_conf', config_name='single_run')
+
+@hydra.main(version_base=None, config_path="../hydra_conf", config_name="single_run")
 def run(cfg):
-    '''
+    """
     Build embedding and evaluate on downstream model
-    '''
+    """
     outdir = Path.cwd()
     indir = None
     for stage in cfg.pipeline:
-      outdir = Path.cwd() / stage
-      outdir.mkdir()
-      stage_func = STAGE2FUNC[stage]
-      stage_func(cfg, outdir, indir=indir)
-      indir = outdir
+        outdir = Path.cwd() / stage
+        outdir.mkdir()
+        stage_func = STAGE2FUNC[stage]
+        stage_func(cfg, outdir, indir=indir)
+        indir = outdir
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run()
