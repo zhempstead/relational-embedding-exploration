@@ -9,6 +9,8 @@ defaults:
   - pipeline: multi
   - override hydra/sweeper: pipeline
 
+multirun: true
+
 hydra:
   job:
     chdir: true

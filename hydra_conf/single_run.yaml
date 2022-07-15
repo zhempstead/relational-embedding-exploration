@@ -8,6 +8,8 @@ defaults:
   - _self_
   - pipeline: single
 
+multirun: false
+
 hydra:
   job:
     chdir: true
