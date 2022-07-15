@@ -17,7 +17,7 @@ def leva_table2graph(indir, outdir, cfg):
     Build graph leva-style: value/row nodes
     """
     edge_dfs = []
-    for path in tqdm(all_csv_in_path(indir / 'train')):
+    for path in tqdm(all_csv_in_path(indir)):
         df = pd.read_csv(path, encoding="latin1", sep=",", low_memory=False)
         edge_df = make_edge_df(df)
         edge_df["table"] = path.stem
