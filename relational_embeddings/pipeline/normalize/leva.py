@@ -18,27 +18,27 @@ def leva_normalize(datadir, outdir, cfg):
     - Either single or multiple tokens per value depending on column grain size
     """
     strategies = dict()
-    for infile in all_csv_in_path(datadir):
+    traindir = outdir / 'train'
+    for infile in all_csv_in_path(datadir / 'train_embeddings'):
         df = pd.read_csv(infile, encoding="latin1", sep=",", low_memory=False)
-        outfile = get_outfile(infile, outdir)
 
         strategy = get_strategy(df)
-        strategies[outfile.name] = strategy
+        strategies[infile.name] = strategy
 
         df = normalize_df(df, strategy, cfg)
 
-        df.to_csv(outfile, index=False)
+        df.to_csv(traindir / infile.name, index=False)
+
+    train_df = pd.read_csv(datadir / 'base_train_x.csv', encoding="latin1", sep=",", low_memory=False)
+    test_df = pd.read_csv(datadir / 'base_test_x.csv', encoding="latin1", sep=",", low_memory=False)
+
+    test_df = normalize_df(test_df, strategies['base.csv'], cfg, model_df=train_df)
+    test_df.to_csv(outdir / 'test.csv', index=False)
+
 
     # Write strategies
     with open(outdir / "strategy.txt", "w") as json_file:
         json.dump(strategies, json_file, indent=4)
-
-
-def get_outfile(infile, outdir):
-    name = infile.name
-    if name.startswith("base"):
-        return outdir / "base.csv"
-    return outdir / name
 
 
 def get_strategy(df):
@@ -79,8 +79,8 @@ def get_strategy(df):
     return strategy
 
 
-def normalize_df(df, strategy, cfg):
-    df = quantize(df, strategy, cfg)
+def normalize_df(df, strategy, cfg, model_df=None):
+    df = quantize(df, strategy, cfg, model_df=model_df)
     for col in df.columns:
         lowercase_removepunct(df, col)
         grain = strategy[col]["grain"]
@@ -89,15 +89,22 @@ def normalize_df(df, strategy, cfg):
     return df
 
 
-def quantize(df, strategy, cfg):
+def quantize(df, strategy, cfg, model_df=None):
+    '''
+    Quantize integer columns. If model_df is set, the bins will be based on the distribution of
+    values in model_df rather than df (for quantizing the test data).
+    '''
+    if model_df is None:
+        model_df = df
+
     num_bins = cfg.num_bins
     # Not enough numerical values for binning
-    if df.shape[0] < 2 * num_bins:
+    if model_df.shape[0] < 2 * num_bins:
         return df
 
     bin_percentile = 100.0 / num_bins
-    for col in df.columns:
-        if df[col].dtype not in [
+    for col in model_df.columns:
+        if model_df[col].dtype not in [
             np.int64,
             np.int32,
             np.int64,
@@ -120,11 +127,11 @@ def quantize(df, strategy, cfg):
         if strategy[col]["int"] == "augment":
             quantized_col = df[col]
         if strategy[col]["int"] == "eqw_quantize":
-            bins = [np.percentile(df[col], i * bin_percentile) for i in range(num_bins)]
+            bins = [np.percentile(model_df[col], i * bin_percentile) for i in range(num_bins)]
             quantized_col = np.digitize(df[col], bins)
         if strategy[col]["int"] == "eqh_quantize":
             bins = [
-                i * (df[col].max() - df[col].min()) / num_bins for i in range(num_bins)
+                i * (model_df[col].max() - model_df[col].min()) / num_bins for i in range(num_bins)
             ]
             quantized_col = np.digitize(df[col], bins)
 
