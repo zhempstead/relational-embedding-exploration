@@ -8,3 +8,5 @@ hydra:
   run:
     dir: .
   output_subdir: null
+
+emb_train_test_split: false
