@@ -5,6 +5,7 @@ defaults:
   - table2graph: leva
   - graph2text: node2vec
   - text2model: word2vec
+  - model2emb: word2vec
   - _self_
   - pipeline: multi
   - override hydra/sweeper: pipeline

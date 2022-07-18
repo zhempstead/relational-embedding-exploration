@@ -15,7 +15,7 @@ from relational_embeddings.lib.utils import make_symlink
 
 def word2vec_text2model(indir, outdir, cfg):
     infile = indir / "text.txt"
-    outfile = outdir / "embeddings"
+    outfile = outdir / "model"
 
     with open(infile) as f:
         text = [line.strip().split(" ") for line in f.readlines()]

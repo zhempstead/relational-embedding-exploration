@@ -4,9 +4,10 @@ hydra:
     subdir: ${pipeline_subdir}
   sweeper:
     pipelines:
-      - [normalize, table2graph, graph2text, text2model]
+      - [normalize, table2graph, graph2text, text2model, model2emb]
     stage_variants:
       normalize: [leva]
       table2graph: [leva]
       graph2text: [node2vec]
       text2model: [word2vec]
+      model2emb: [word2vec]
