@@ -20,25 +20,17 @@ def leva_normalize(datadir, outdir, cfg):
     strategies = dict()
     for infile in all_csv_in_path(datadir):
         df = pd.read_csv(infile, encoding="latin1", sep=",", low_memory=False)
-        outfile = get_outfile(infile, outdir)
 
         strategy = get_strategy(df)
-        strategies[outfile.name] = strategy
+        strategies[infile.name] = strategy
 
         df = normalize_df(df, strategy, cfg)
 
-        df.to_csv(outfile, index=False)
+        df.to_csv(outdir / infile.name, index=False)
 
     # Write strategies
     with open(outdir / "strategy.txt", "w") as json_file:
         json.dump(strategies, json_file, indent=4)
-
-
-def get_outfile(infile, outdir):
-    name = infile.name
-    if name.startswith("base"):
-        return outdir / "base.csv"
-    return outdir / name
 
 
 def get_strategy(df):
