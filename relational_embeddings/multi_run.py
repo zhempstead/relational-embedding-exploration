@@ -2,7 +2,7 @@ from pathlib import Path
 
 import hydra
 
-from relational_embeddings.single_run import STAGE2FUNC
+from relational_embeddings.stage_run import STAGE2FUNC
 
 from relational_embeddings.pipeline.normalize import normalize
 from relational_embeddings.pipeline.table2graph import table2graph
