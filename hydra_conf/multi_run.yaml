@@ -6,6 +6,7 @@ defaults:
   - graph2text: node2vec
   - text2model: word2vec
   - model2emb: word2vec
+  - classification: basic
   - _self_
   - pipeline: multi
   - override hydra/sweeper: pipeline

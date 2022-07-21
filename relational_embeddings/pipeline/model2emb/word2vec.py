@@ -9,7 +9,7 @@ from relational_embeddings.lib.utils import make_symlink
 def word2vec_model2emb(indir, outdir, cfg, table_csv):
     model = KeyedVectors.load_word2vec_format(indir / "model")
     model_cnf = OmegaConf.load(indir / "model_cnf")
-    outfile = outdir / "embeddings"
+    outfile = outdir / "embeddings.csv"
 
     word_dict = TokenDict()
     word_dict.load(indir / "word_dict")
