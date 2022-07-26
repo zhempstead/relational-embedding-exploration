@@ -1,0 +1,4 @@
+name: kraken-engineered
+target_column: result 
+test_size: 0.2
+random_seed: 10
