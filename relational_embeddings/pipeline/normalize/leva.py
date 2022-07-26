@@ -118,7 +118,7 @@ def quantize(df, strategy, cfg):
             bins = [
                 i * (df[col].max() - df[col].min()) / num_bins for i in range(num_bins)
             ]
-            quantized_col = np.digitize(df[col], bins)
+            quantized_col = pd.Series(np.digitize(df[col], bins))
 
         quantized_col = quantized_col.astype(str)
 

@@ -26,16 +26,17 @@ def classification(cfg, outdir, indir=None):
         df_x, df_y, test_size=cfg.classification.test_size,
         random_state=cfg.classification.random_seed)
 
-    for method in cfg.classification.methods:
-        print(f"Classification method '{method}':")
-        method_func = METHOD2FUNC[method]
-        method_func(df_train_x, df_test_x, df_train_y, df_test_y, cfg.classification, outdir)
+    with open(outdir / 'results.txt', 'w') as fout:
+        for method in cfg.classification.methods:
+            fout.write(f"Classification method '{method}':")
+            method_func = METHOD2FUNC[method]
+            method_func(df_train_x, df_test_x, df_train_y, df_test_y, cfg.classification, outdir, fout)
 
 
     print(f"Done with classification! Results at '{outdir}'")
 
 
-def classification_task_rf(X_train, X_test, y_train, y_test, cfg, outdir):
+def classification_task_rf(X_train, X_test, y_train, y_test, cfg, outdir, fout):
     rf = Pipeline([
         ("rf", RandomForestClassifier(random_state=7, min_samples_split=5))
     ])
@@ -44,10 +45,10 @@ def classification_task_rf(X_train, X_test, y_train, y_test, cfg, outdir):
     }
     greg = GridSearchCV(estimator=rf, param_grid=parameters, cv=5, verbose=0)
     greg.fit(X_train, y_train)
-    return show_stats(greg, X_train, X_test, y_train, y_test)
+    return show_stats(greg, X_train, X_test, y_train, y_test, fout=fout)
 
 
-def classification_task_logr(X_train, X_test, y_train, y_test, cfg, outdir):
+def classification_task_logr(X_train, X_test, y_train, y_test, cfg, outdir, fout):
     lr = Pipeline([
         ("lr", LogisticRegression(random_state=7, penalty="elasticnet", solver="saga", max_iter=2000))
     ])
@@ -56,10 +57,10 @@ def classification_task_logr(X_train, X_test, y_train, y_test, cfg, outdir):
     }
     greg = GridSearchCV(estimator=lr, param_grid=parameters, cv=2, verbose=0)
     greg.fit(X_train, y_train)
-    return show_stats(greg, X_train, X_test, y_train, y_test)
+    return show_stats(greg, X_train, X_test, y_train, y_test, fout=fout)
 
 
-def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
+def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir, fout):
     input_size = X_train.shape[1]
     ncategories = np.max(y_train) + 1
     model = tf.keras.Sequential([
@@ -81,7 +82,7 @@ def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
                         validation_data=(X_test, y_test))
     plot_tf_history(history, outdir / 'nn')
     model.evaluate(X_test, y_test, verbose=0)
-    return show_stats(model, X_train, X_test, y_train, y_test, argmax=True)
+    return show_stats(model, X_train, X_test, y_train, y_test, argmax=True, fout=fout)
 
 
 
