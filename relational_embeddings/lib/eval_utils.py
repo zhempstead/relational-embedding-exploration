@@ -10,12 +10,12 @@ def show_stats(model, X_train, X_test, y_train, y_test, argmax=False, metric=acc
     if argmax == True:
         X_pred_train = np.argmax(X_pred_train, axis=1)
         X_pred_test = np.argmax(X_pred_test, axis=1)
-    fout.write(f"an pred: {y_test[:30]}")
-    fout.write(f"my pred: {X_pred_test[:30]}")
+    fout.write(f"an pred: {y_test[:30]}\n")
+    fout.write(f"my pred: {X_pred_test[:30]}\n")
     pscore_train = metric(y_train, X_pred_train)
     pscore_test = metric(y_test, X_pred_test)
     # print("Confusion Matrix:", confusion_matrix(y_test, X_pred_test))
-    fout.write(f"Train accuracy {pscore_train}, Test accuracy {pscore_test}")
+    fout.write(f"Train accuracy {pscore_train}, Test accuracy {pscore_test}\n")
     return pscore_train, pscore_test
 
 
