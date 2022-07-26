@@ -1,2 +1,3 @@
 # @package _global_
 pipeline: [normalize, table2graph, graph2text, text2model, model2emb, classification]
+# pipeline: [normalize, table2graph, graph2model, model2emb, classification]

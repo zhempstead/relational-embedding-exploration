@@ -3,6 +3,7 @@ defaults:
   - embedding: small
   - normalize: leva
   - table2graph: leva
+  - graph2model: ProNE
   - graph2text: node2vec
   - text2model: word2vec
   - model2emb: word2vec

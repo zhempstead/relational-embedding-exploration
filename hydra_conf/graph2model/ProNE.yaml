@@ -1,0 +1,6 @@
+method: ProNE
+dimensions: ${embedding.dimensions}
+weighted: true
+step: 10
+theta: 0.5
+mu: 0.2

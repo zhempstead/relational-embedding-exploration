@@ -10,12 +10,12 @@ Knowledge Discovery and Data Mining (KDD), 2016
 from collections import defaultdict
 import random
 
-import networkx as nx
 from numpy.random import choice
 
 # import pandas as pd
 from tqdm import tqdm
 
+from relational_embeddings.lib.graph_utils import read_graph
 
 def node2vec_graph2text(indir, outdir, cfg):
     infile = indir / "edgelist"
@@ -35,75 +35,6 @@ def node2vec_graph2text(indir, outdir, cfg):
             for walk in walks:
                 f.write(" ".join(walk) + "\n")
     print("Walking Done!")
-
-
-def read_graph(infile, weighted):
-    """
-    Reads the input network in networkx.
-    """
-    if weighted:
-        G = nx.read_edgelist(
-            infile,
-            nodetype=int,
-            data=(("weight", float),),
-            create_using=nx.DiGraph(),
-            delimiter=" ",
-            comments="?",
-        )
-    else:
-        G = nx.read_edgelist(
-            infile,
-            nodetype=int,
-            data=(("weight", float),),
-            create_using=nx.DiGraph(),
-            delimiter=" ",
-            comments="?",
-        )
-        for edge in G.edges():
-            G[edge[0]][edge[1]]["weight"] = 1
-    G = G.to_undirected()
-    return G
-
-
-def main(args):
-    """
-    Pipeline for representational learning for all nodes in a graph.
-    """
-    nx_G = read_graph()
-    print("Reading Done!")
-    G = node2vec.Graph(nx_G, args.p, args.q, args.weighted)
-    print("Creation Done!")
-    G.preprocess_transition_probs()
-    print("Preprocess Done!")
-    walks = G.simulate_walks(args.num_walks, args.walk_length)
-    print("Walking Done!")
-    current, peak = tracemalloc.get_traced_memory()
-    print(f"Current memory usage is {current / 10**6}MB; Peak was {peak / 10**6}MB")
-
-    file_name = (
-        args.task if args.suffix == "" else "{}_{}".format(args.task, args.suffix)
-    )
-    walks_save_path = "walks/{}.txt".format(file_name)
-    with open(walks_save_path, "w") as f:
-        for walk in walks:
-            f.writelines("%s " % place for place in walk)
-            f.writelines("\n")
-    learn_embeddings(walks)
-
-    # cnts = pd.DataFrame(walks).stack().value_counts()
-    # restart_lst = list(cnts[cnts < cnts.quantile(0.25)].index)
-    # additional_walks = max(int(args.num_walks * 0.1), 4)
-    # print("additional walks", additional_walks)
-    # restart_walks = G.simulate_walks(additional_walks * 4, args.walk_length, nodes=restart_lst)
-    # args.output = args.output[:-4] + "_restart.emb"
-
-    # walks_restart_save_path = "walks/{}_restart.txt".format(file_name)
-    # new_walks = restart_walks + walks[:-additional_walks * cnts.shape[0]]
-    # with open(walks_restart_save_path, 'w') as f:
-    #   for walk in new_walks:
-    #     f.writelines("%s " % place for place in walk)
-    #     f.writelines("\n")
-    # learn_embeddings(new_walks)
 
 
 class Graph:
