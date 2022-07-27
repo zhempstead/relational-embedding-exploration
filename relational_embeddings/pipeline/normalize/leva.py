@@ -1,4 +1,5 @@
 from collections import defaultdict
+import datetime as dt
 import json
 import re
 
@@ -41,15 +42,24 @@ def get_strategy(df):
 
     for col in df.columns:
         integer_strategy, grain_strategy = "augment", "cell"
+        convert_dt = is_dt_col(df[col])
         num_distinct_numericals = df[col].nunique()
 
-        if "id" not in col and df[col].dtype in [
+        if "id" not in col and (convert_dt or df[col].dtype in [
             np.float,
             np.float16,
             np.float32,
             np.float64,
-        ]:
-            if abs(df[col].skew()) >= 2:
+        ]):
+            if convert_dt:
+                strategy[col]["convert_dt"] = True
+                # This gets done redundantly later. This redundancy lets get_strategy() remain a
+                # pure function
+                floatcol = dt_col_to_float(df[col])
+            else:
+                floatcol = df[col]
+
+            if abs(floatcol.skew()) >= 2:
                 integer_strategy = "eqw_quantize"
             else:
                 integer_strategy = "eqh_quantize"
@@ -71,6 +81,22 @@ def get_strategy(df):
     return strategy
 
 
+def is_dt_col(series):
+    '''
+    Heuristic is that if we *can't* convert a column to float without error but we *can* call
+    pd.to_datetime without error the column is a date/datetime.
+    '''
+    try:
+        floatcol = series.astype(float)
+        return False
+    except (TypeError, ValueError):
+        try:
+            dtcol = pd.to_datetime(series)
+            return True
+        except (TypeError, ValueError):
+            return False
+
+
 def normalize_df(df, strategy, cfg):
     df = quantize(df, strategy, cfg)
     for col in df.columns:
@@ -89,6 +115,9 @@ def quantize(df, strategy, cfg):
 
     bin_percentile = 100.0 / num_bins
     for col in df.columns:
+        if strategy[col].get('convert_dt'):
+            df[col] = dt_col_to_float(df[col])
+
         if df[col].dtype not in [
             np.int64,
             np.int32,
@@ -131,6 +160,15 @@ def quantize(df, strategy, cfg):
 
         df[col] = quantized_col
     return df
+
+
+def dt_col_to_float(series):
+    '''
+    Convert into float (seconds from epoch).
+    We treat date/datetimes like numeric columns and don't take advantage of implicit joins
+    '''
+    dtcol = pd.to_datetime(series)
+    return (dtcol - dt.datetime(1970, 1, 1)).dt.total_seconds()
 
 
 def lowercase_removepunct(df, col):
