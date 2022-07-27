@@ -1,0 +1,4 @@
+name: ftp
+target_column: gender
+test_size: 0.2
+random_seed: 10

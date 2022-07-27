@@ -1,6 +1,6 @@
 defaults:
   - dataset: sample
-  - embedding: small
+  - embedding: regular
   - normalize: leva
   - table2graph: leva
   - graph2model: ProNE
