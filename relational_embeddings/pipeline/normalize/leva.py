@@ -115,9 +115,8 @@ def quantize(df, strategy, cfg):
             bins = [np.percentile(df[col], i * bin_percentile) for i in range(num_bins)]
             quantized_col = np.digitize(df[col], bins)
         if strategy[col]["int"] == "eqh_quantize":
-            bins = [
-                i * (df[col].max() - df[col].min()) / num_bins for i in range(num_bins)
-            ]
+            # The '[:-1]' prevents the max value from being converted to num_bins+1
+            bins = np.histogram_bin_edges(df[col], bins=num_bins)[:-1]
             quantized_col = pd.Series(np.digitize(df[col], bins))
 
         quantized_col = quantized_col.astype(str)
