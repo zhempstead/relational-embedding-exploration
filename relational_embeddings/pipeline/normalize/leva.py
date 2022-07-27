@@ -60,16 +60,16 @@ def get_strategy(df):
                 floatcol = df[col]
 
             if abs(floatcol.skew()) >= 2:
-                integer_strategy = "eqw_quantize"
+                integer_strategy = "eqd_quantize"
             else:
-                integer_strategy = "eqh_quantize"
+                integer_strategy = "eqw_quantize"
 
         if df[col].dtype in [np.int64, np.int32, np.int64, np.int]:
             if df[col].max() - df[col].min() >= 5 * df[col].shape[0]:
                 if abs(df[col].skew()) >= 2:
-                    integer_strategy = "eqw_quantize"
+                    integer_strategy = "eqd_quantize"
                 else:
-                    integer_strategy = "eqh_quantize"
+                    integer_strategy = "eqw_quantize"
 
         if df[col].dtype == np.object:
             num_tokens_med = (df[col].str.count(" ") + 1).median()
@@ -140,10 +140,10 @@ def quantize(df, strategy, cfg):
             augment = False
         if strategy[col]["int"] == "augment":
             quantized_col = df[col]
-        if strategy[col]["int"] == "eqw_quantize":
+        if strategy[col]["int"] == "eqd_quantize":
             bins = [np.percentile(df[col], i * bin_percentile) for i in range(num_bins)]
             quantized_col = np.digitize(df[col], bins)
-        if strategy[col]["int"] == "eqh_quantize":
+        if strategy[col]["int"] == "eqw_quantize":
             # The '[:-1]' prevents the max value from being converted to num_bins+1
             bins = np.histogram_bin_edges(df[col], bins=num_bins)[:-1]
             quantized_col = pd.Series(np.digitize(df[col], bins))
