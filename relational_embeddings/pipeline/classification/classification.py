@@ -28,9 +28,10 @@ def classification(cfg, outdir, indir=None):
 
     with open(outdir / 'results.txt', 'w') as fout:
         for method in cfg.classification.methods:
-            fout.write(f"Classification method '{method}':")
+            fout.write(f"Classification method '{method}':\n")
             method_func = METHOD2FUNC[method]
             method_func(df_train_x, df_test_x, df_train_y, df_test_y, cfg.classification, outdir, fout)
+            fout.write("\n")
 
 
     print(f"Done with classification! Results at '{outdir}'")
