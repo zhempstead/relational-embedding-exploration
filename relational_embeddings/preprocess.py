@@ -1,9 +1,7 @@
-from pathlib import Path
 import shutil
 
 import hydra
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
 from relational_embeddings.lib.utils import all_csv_in_path, dataset_dir, make_symlink
 
@@ -26,48 +24,20 @@ def preprocess(cfg):
     df = pd.read_csv(base_file)
     df = df[df[target_column].notna()]
 
-    if cfg.emb_train_test_split:
-        # TODO: this isn't compatible with the downstream script yet
-        train_x_file = location / "base_train_x.csv"
-        train_y_file = location / "base_train_y.csv"
-        test_x_file = location / "base_test_x.csv"
-        test_y_file = location / "base_test_y.csv"
+    x_file = location / "base_x.csv"
+    y_file = location / "base_y.csv"
 
-        train_df, test_df = train_test_split(
-            df, test_size=cfg.dataset.test_size, random_state=cfg.dataset.random_seed
-        )
+    y_df = df[target_column]
+    x_df = df.drop(target_column, axis=1)
 
-        train_y_df = train_df[target_column]
-        train_df = train_df.drop(target_column, axis=1)
+    for df, fname in [
+        (x_df, x_file),
+        (y_df, y_file),
+    ]:
+        print(f"Writing '{fname}'...")
+        df.to_csv(fname, index=False)
 
-        test_y_df = test_df[target_column]
-        test_df = test_df.drop(target_column, axis=1)
-
-        for df, fname in [
-            (train_df, train_x_file),
-            (train_y_df, train_y_file),
-            (test_df, test_x_file),
-            (test_y_df, test_y_file),
-        ]:
-            print(f"Writing '{fname}'...")
-            df.to_csv(fname, index=False)
-
-        make_symlink(train_x_file, train_emb_dir / "base.csv")
-    else:
-        x_file = location / "base_x.csv"
-        y_file = location / "base_y.csv"
-
-        y_df = df[target_column]
-        x_df = df.drop(target_column, axis=1)
-
-        for df, fname in [
-            (x_df, x_file),
-            (y_df, y_file),
-        ]:
-            print(f"Writing '{fname}'...")
-            df.to_csv(fname, index=False)
-
-        make_symlink(x_file, train_emb_dir / "base.csv")
+    make_symlink(x_file, train_emb_dir / "base.csv")
         
 
     for path in all_csv_in_path(location, exclude_base=True):
