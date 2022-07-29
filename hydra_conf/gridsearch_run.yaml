@@ -1,0 +1,20 @@
+defaults:
+  - dataset: sample
+  - embedding: small
+  - normalize: leva
+  - table2graph: leva
+  - graph2model: ProNE
+  - graph2text: node2vec
+  - text2model: word2vec
+  - model2emb: word2vec
+  - classification: basic
+  - _self_
+  - pipeline: gridsearch
+  - override hydra/sweeper: gridsearch
+
+multirun: true
+
+hydra:
+  job:
+    chdir: true
+  mode: MULTIRUN
