@@ -3,4 +3,4 @@ methods:
   - random_forest
   - nn
 random_seed: 10
-test_size: 0.2
+cv_splits: 5

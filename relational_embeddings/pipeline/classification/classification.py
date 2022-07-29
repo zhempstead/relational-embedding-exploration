@@ -4,11 +4,11 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.pipeline import Pipeline
 import tensorflow as tf
 
-from relational_embeddings.lib.eval_utils import plot_tf_history, show_stats
+from relational_embeddings.lib.eval_utils import plot_tf_history, report_metric
 from relational_embeddings.lib.utils import dataset_dir
 
 def classification(cfg, outdir, indir=None):
@@ -18,26 +18,57 @@ def classification(cfg, outdir, indir=None):
     if indir is None:
         indir = outdir.parent
 
+    random_state = np.random.RandomState(seed=cfg.classification.random_seed)
+
     df_x = pd.read_csv(indir / 'embeddings.csv')
     df_y = pd.read_csv(dataset_dir(cfg.dataset.name) / 'base_y.csv')
+
+    shuffled_idx = random_state.permutation(len(df_x))
+    df_x = df_x.reindex(shuffled_idx)
+    df_y = df_y.reindex(shuffled_idx)
     df_y = pd.Categorical(df_y[cfg.dataset.target_column]).codes
 
-    df_train_x, df_test_x, df_train_y, df_test_y = train_test_split(
-        df_x, df_y, test_size=cfg.classification.test_size,
-        random_state=cfg.classification.random_seed)
+    
+    kfold = StratifiedKFold(n_splits=cfg.classification.cv_splits)
+
+    train_test_idxs = list(kfold.split(df_x, df_y))
 
     with open(outdir / 'results.txt', 'w') as fout:
         for method in cfg.classification.methods:
-            fout.write(f"Classification method '{method}':\n")
+            tee(fout, f"Classification method '{method}':")
             method_func = METHOD2FUNC[method]
-            method_func(df_train_x, df_test_x, df_train_y, df_test_y, cfg.classification, outdir, fout)
-            fout.write("\n")
-
+            pscore_trains = []
+            pscore_tests = []
+            for it in range(cfg.classification.cv_splits):
+                tee(fout, f"  Iteration {it+1}/{cfg.classification.cv_splits}:")
+                train_idx, test_idx = train_test_idxs[it]
+                df_train_x = df_x.iloc[train_idx]
+                df_test_x = df_x.iloc[test_idx]
+                df_train_y = df_y[train_idx]
+                df_test_y = df_y[test_idx]
+                pscore_train, pscore_test, cm, y_sample, pred_sample = \
+                    method_func(df_train_x, df_test_x, df_train_y, df_test_y, cfg.classification, outdir)
+                pscore_trains.append(pscore_train)
+                pscore_tests.append(pscore_test)
+                tee(fout, f"    real: {y_sample}")
+                tee(fout, f"    pred: {pred_sample}")
+                tee(fout, f"    Train accuracy {pscore_train}, Test accuracy {pscore_test}")
+                tee(fout, f"    Confusion matrix:\n{cm}")
+            pscore_train = sum(pscore_trains) / cfg.classification.cv_splits
+            pscore_test = sum(pscore_tests) / cfg.classification.cv_splits
+            tee(fout, f"Overall train accuracy for '{method}': {pscore_train}")
+            tee(fout, f"Overall test accuracy for '{method}': {pscore_test}")
+            tee(fout, "")
 
     print(f"Done with classification! Results at '{outdir}'")
 
 
-def classification_task_rf(X_train, X_test, y_train, y_test, cfg, outdir, fout):
+def tee(fout, text):
+    print(text)
+    fout.write(text)
+    fout.write("\n")
+
+def classification_task_rf(X_train, X_test, y_train, y_test, cfg, outdir):
     rf = Pipeline([
         ("rf", RandomForestClassifier(random_state=7, min_samples_split=5))
     ])
@@ -46,10 +77,10 @@ def classification_task_rf(X_train, X_test, y_train, y_test, cfg, outdir, fout):
     }
     greg = GridSearchCV(estimator=rf, param_grid=parameters, cv=5, verbose=0)
     greg.fit(X_train, y_train)
-    return show_stats(greg, X_train, X_test, y_train, y_test, fout=fout)
+    return report_metric(greg, X_train, X_test, y_train, y_test)
 
 
-def classification_task_logr(X_train, X_test, y_train, y_test, cfg, outdir, fout):
+def classification_task_logr(X_train, X_test, y_train, y_test, cfg, outdir):
     lr = Pipeline([
         ("lr", LogisticRegression(random_state=7, penalty="elasticnet", solver="saga", max_iter=2000))
     ])
@@ -58,10 +89,10 @@ def classification_task_logr(X_train, X_test, y_train, y_test, cfg, outdir, fout
     }
     greg = GridSearchCV(estimator=lr, param_grid=parameters, cv=2, verbose=0)
     greg.fit(X_train, y_train)
-    return show_stats(greg, X_train, X_test, y_train, y_test, fout=fout)
+    return report_metric(greg, X_train, X_test, y_train, y_test)
 
 
-def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir, fout):
+def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
     input_size = X_train.shape[1]
     ncategories = np.max(y_train) + 1
     model = tf.keras.Sequential([
@@ -83,7 +114,7 @@ def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir, fout):
                         validation_data=(X_test, y_test))
     plot_tf_history(history, outdir / 'nn')
     model.evaluate(X_test, y_test, verbose=0)
-    return show_stats(model, X_train, X_test, y_train, y_test, argmax=True, fout=fout)
+    return report_metric(model, X_train, X_test, y_train, y_test, argmax=True)
 
 
 
