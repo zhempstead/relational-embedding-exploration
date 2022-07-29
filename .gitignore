@@ -40,7 +40,9 @@
 
 
 # Data set 
-data/*
+#data/*
+data/*/base_*
+data/*/train_embeddings
 
 # Trained models and texification file
 *.bin
