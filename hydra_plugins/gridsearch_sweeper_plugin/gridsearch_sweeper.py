@@ -113,7 +113,6 @@ class GridsearchSweeper(Sweeper):
             else:
                 prev_stage_tasks = [list(prev) + [new] for prev, new in itertools.product(prev_stage_tasks, stage_tasks)]
                 all_stage_tasks += prev_stage_tasks
-        import pdb; pdb.set_trace()
         hydra_tasks = [task2hydra(t, simple_overrides) for t in all_stage_tasks]
         self.validate_batch_is_legal(hydra_tasks)
         return self.launcher.launch(hydra_tasks, initial_job_idx=0)
