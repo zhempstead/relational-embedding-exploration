@@ -121,17 +121,27 @@ def task2hydra(task: List[Tuple[str, Optional[List[Tuple[str, str]]]]], simple_o
     subdir_path = []
     all_overrides = simple_overrides.copy()
     for stage, overrides in task:
-        if overrides is None:
-            subdir_path.append(stage)
-        else:
-            subdir = [stage]
-            for key, value in overrides:
-                key_suffix = key.split('.', 1)[1]
-                subdir.append(f"{key_suffix}={value}")
-                all_overrides.append(f"{key}={value}")
-            subdir_path.append(",".join(subdir))
+        subdir_path.append(get_subdir(stage, overrides))
+        if overrides is not None:
+            all_overrides += [f"{key}={value}" for key, value in overrides]
     all_overrides += [f"+pipeline_stage={stage}", f"+pipeline_subdir='{'/'.join(subdir_path)}'"]
     return tuple(all_overrides)
+
+def get_subdir(stage: str, overrides: Optional[List[Tuple[str, str]]]):
+    '''
+    Return the subdir for the given stage and set of overrides
+    '''
+    if overrides is None:
+        return stage
+    subdir = [stage]
+    for key, value in overrides:
+        key_suffix = key.split('.', 1)[1]
+        try:
+            # So directories of int overrides have nice sort order
+            subdir.append(f"{key_suffix}={value:04d}")
+        except ValueError:
+            subdir.append(f"{key_suffix}={value}")
+    return ",".join(subdir)
 
 
 def add_overrides(task: Tuple[str, ...], overrides: List[str]) -> Tuple[str, ...]:
