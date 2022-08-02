@@ -136,9 +136,9 @@ def get_subdir(stage: str, overrides: Optional[List[Tuple[str, str]]]):
     subdir = [stage]
     for key, value in overrides:
         key_suffix = key.split('.', 1)[1]
-        try:
+        try: 
             # So directories of int overrides have nice sort order
-            subdir.append(f"{key_suffix}={value:04d}")
+            subdir.append(f"{key_suffix}={int(value):04d}")
         except ValueError:
             subdir.append(f"{key_suffix}={value}")
     return ",".join(subdir)
