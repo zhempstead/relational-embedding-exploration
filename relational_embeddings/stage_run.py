@@ -23,13 +23,14 @@ STAGE2FUNC = {
 @argh.arg('overrides', default=None)
 def run(wdir, stage=None, *overrides):
     wdir = Path(wdir)
+    is_multirun = 'multirun' in wdir.parts
     if stage is None:
         stage = wdir.name
-        wdir = wdir.parent
+        if not is_multirun:
+            wdir = wdir.parent
     if overrides is None:
         overrides = []
-    if not wdir.is_absolute():
-        wdir = Path(__file__).resolve().parent.parent / 'outputs' / wdir
+
     
     outdir = wdir / stage
     if outdir.exists():
@@ -41,6 +42,8 @@ def run(wdir, stage=None, *overrides):
     stage_idx = cfg.pipeline.index(stage)
     if stage_idx == 0:
         indir = None
+    elif is_multirun:
+        indir = wdir.parent
     else:
         indir = wdir / cfg.pipeline[stage_idx - 1]
     run_stage(stage, cfg, outdir, indir=indir)
