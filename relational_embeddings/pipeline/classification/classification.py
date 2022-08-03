@@ -72,7 +72,8 @@ def classification(cfg, outdir, indir=None):
         'model': cfg.classification.methods,
     })
     df['dataset'] = cfg.dataset.name
-    for var, val in get_sweep_vars(outdir, cfg).items():
+    sweep_vars = get_sweep_vars(outdir, cfg)
+    for var, val in sweep_vars.items():
         df[var] = val
     df = df[['dataset'] + list(sweep_vars.keys) + ['model', 'pscore_train', 'pscore_test']]
     df.to_csv(outdir / 'results.csv', index=False)
