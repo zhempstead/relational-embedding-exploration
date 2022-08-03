@@ -33,6 +33,9 @@ def classification(cfg, outdir, indir=None):
 
     train_test_idxs = list(kfold.split(df_x, df_y))
 
+    pscore_train_avgs = []
+    pscore_test_avgs = []
+
     with open(outdir / 'results.txt', 'w') as fout:
         for method in cfg.classification.methods:
             tee(fout, f"Classification method '{method}':")
@@ -56,11 +59,46 @@ def classification(cfg, outdir, indir=None):
                 tee(fout, f"    Confusion matrix:\n{cm}")
             pscore_train = sum(pscore_trains) / cfg.classification.cv_splits
             pscore_test = sum(pscore_tests) / cfg.classification.cv_splits
+
+            pscore_train_avgs.append(pscore_train)
+            pscore_test_avgs.append(pscore_test)
             tee(fout, f"Overall train accuracy for '{method}': {pscore_train}")
             tee(fout, f"Overall test accuracy for '{method}': {pscore_test}")
             tee(fout, "")
 
+    df = pd.DataFrame({
+        'pscore_train': pscore_train_avgs,
+        'pscore_test': pscore_test_avgs,
+        'model': cfg.classification.methods,
+    })
+    df['dataset'] = cfg.dataset.name
+    for var, val in get_sweep_vars(outdir):
+        df[var] = val
+    df = df[['dataset'] + list(sweep_vars.keys) + ['model', 'pscore_train', 'pscore_test']]
+    df.to_csv(outdir / 'results.csv', index=False)
+
     print(f"Done with classification! Results at '{outdir}'")
+
+
+def get_sweep_vars(outdir, cfg):
+    '''
+    Get relevant sweep variables and their values by parsing outdir
+    '''
+    sweep_vars = {}
+    for subdir in outdir.parts:
+        parts = subdir.split(',')
+        if len(parts) == 1:
+            continue
+        stage = parts[0]
+        for part in parts[1:]:
+            var, value = part.split('=')
+            try:
+                value = int(value)
+            except ValueError:
+                pass
+            sweep_vars[f'{stage}.{var}'] = value
+    return sweep_vars
+
 
 
 def tee(fout, text):
