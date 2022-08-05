@@ -17,10 +17,19 @@ def word2vec_model2emb(indir, outdir, cfg, table_csv):
     df = pd.read_csv(table_csv)
     num_rows = len(df)
 
-    emb_df = get_base_row_vectors(model, word_dict, num_rows)
+    if cfg.use_value_nodes:
+        emb_df = get_base_row_val_vectors(model, word_dict, df)
+    else:
+        emb_df = get_base_row_vectors(model, word_dict, num_rows)
     emb_df.to_csv(outfile, index=False)
 
 
 def get_base_row_vectors(model, word_dict, num_rows):
     row_tokens = [f'base_row:{idx}' for idx in range(num_rows)]
     return pd.DataFrame([model[word_dict.getNumForToken(rt)] for rt in row_tokens])
+
+def get_base_row_val_vectors(model, word_dict, df):
+    df['base_row'] = [f'base_row:{idx}' for idx in range(len(df))]
+    for col in df.columns:
+        df[col] = [word_dict.getNumForToken(rt) for rt in df[col]]
+    return pd.DataFrame([sum(model[row[1:]]) for row in df.itertuples()])

@@ -3,3 +3,4 @@ dimensions: ${embedding.dimensions}
 window_size: 10 # Context size for optimization
 iter: 10 # Number of epochs in SGD
 workers: 16 # Number of parallel workers
+use_value_nodes: True
