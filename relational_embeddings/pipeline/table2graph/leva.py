@@ -8,9 +8,6 @@ from tqdm import tqdm
 from relational_embeddings.lib.token_dict import TokenDict
 from relational_embeddings.lib.utils import all_csv_in_path
 
-NUM_THRESHOLD = 5000
-DISTINCT_THRESHOLD = 5
-
 
 def leva_table2graph(indir, outdir, cfg):
     """
@@ -24,7 +21,7 @@ def leva_table2graph(indir, outdir, cfg):
         edge_dfs.append(edge_df)
 
     edge_df = pd.concat(edge_dfs, ignore_index=True)
-    edge_df = filter_and_add_weights(edge_df)
+    edge_df = add_weights(edge_df)
     edge_df = format_rows(edge_df)
 
     cc = TokenDict()
@@ -57,15 +54,11 @@ def make_edge_df(df):
     return df
 
 
-def filter_and_add_weights(edge_df):
+def add_weights(edge_df):
     """
-    - Remove value nodes with too many / too few edges
     - Add weights based on number of value node edges
     """
     links = edge_df.groupby("val")["table"].agg(["size", "nunique"])
-    links = links[links["size"] != 1]
-    links = links[links["size"] < NUM_THRESHOLD]
-    links = links[links["nunique"] < DISTINCT_THRESHOLD]
     links["weight"] = 1.0 / links["size"]
     links = links.reset_index()
     links = links[["val", "weight"]]
