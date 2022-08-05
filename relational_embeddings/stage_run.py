@@ -30,11 +30,15 @@ def run(wdir, stage=None, *overrides):
             wdir = wdir.parent
     if overrides is None:
         overrides = []
+    if is_multirun:
+        overrides += ('multirun=True',)
 
-    
-    outdir = wdir / stage
-    if outdir.exists():
-        shutil.rmtree(outdir)
+    if is_multirun:
+        outdir = wdir
+    else:
+        outdir = wdir / stage
+        if outdir.exists():
+            shutil.rmtree(outdir)
 
     with hydra.initialize(version_base=None, config_path="../hydra_conf"):
         cfg = hydra.compose(config_name="single_run", overrides=overrides)
@@ -50,7 +54,7 @@ def run(wdir, stage=None, *overrides):
 
 
 def run_stage(stage, cfg, outdir, indir=None):
-    outdir.mkdir()
+    outdir.mkdir(exist_ok=True)
     stage_func = STAGE2FUNC[stage]
     stage_func(cfg, outdir, indir=indir)
 
