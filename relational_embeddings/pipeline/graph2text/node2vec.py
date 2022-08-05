@@ -7,7 +7,6 @@ Aditya Grover and Jure Leskovec
 Knowledge Discovery and Data Mining (KDD), 2016
 """
 
-from collections import defaultdict
 import random
 
 from numpy.random import choice
@@ -38,7 +37,7 @@ def node2vec_graph2text(indir, outdir, cfg):
 
 
 class Graph:
-    def __init__(self, nx_G, p, q, is_weighted, limit=1000):
+    def __init__(self, nx_G, p, q, is_weighted):
         self.G = nx_G
         self.p = p
         self.q = q
@@ -51,9 +50,6 @@ class Graph:
             [float(i) / sum(prob_vector) for i in prob_vector]
             for prob_vector in self.adjList_prob
         ]
-
-        self.limit_dict = defaultdict(int)
-        self.limit = limit
 
     def node2vec_walk(self, walk_length, start_node):
         """
@@ -68,16 +64,7 @@ class Graph:
                 nxt = choice(self.adjList[curr], p=self.adjList_prob[curr])
             else:
                 nxt = choice(self.adjList[curr])
-            self.limit_dict[nxt] += 1
-            if self.limit_dict[nxt] >= self.limit:
-                pass
-                # idx = self.adjList[curr].index(nxt)
-                # self.adjList[curr].pop(idx)
-                # self.adjList_prob[curr].pop(idx)
-                # norm_sum = sum(self.adjList_prob[curr])
-                # self.adjList_prob[curr] = [float(i) / norm_sum for i in self.adjList_prob[curr]]
-            else:
-                walk.append(nxt)
+            walk.append(nxt)
             curr = nxt
         return list(map(lambda x: str(x), walk))
 
