@@ -3,6 +3,7 @@ from pathlib import Path
 from omegaconf import OmegaConf
 
 from relational_embeddings.pipeline.table2graph.leva import leva_table2graph
+from relational_embeddings.pipeline.table2graph.embdi import embdi_table2graph
 
 
 def table2graph(cfg, outdir, indir=None):
@@ -17,6 +18,9 @@ def table2graph(cfg, outdir, indir=None):
     if cfg.table2graph.method == "leva":
         leva_table2graph(indir, outdir, cfg.table2graph)
         node_types = {"values": True, "columns": False, "rows": False}
+    elif cfg.table2graph.method == "embdi":
+        embdi_table2graph(indir, outdir, cfg.table2graph)
+        node_types = {"values": True, "columns": True, "rows": True}
     else:
         raise ValueError("Unrecognized table2graph method '{cfg.table2graph.method}'")
 
