@@ -1,0 +1,3 @@
+[submodule "scikit-hubness"]
+	path = scikit-hubness
+	url = https://github.com/VarIr/scikit-hubness

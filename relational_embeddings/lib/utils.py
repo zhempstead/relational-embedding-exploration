@@ -24,3 +24,23 @@ def prev_stage_dir(cwd, prev_stage, multirun):
         return cwd
     else:
         return cwd.parent / prev_stage
+
+
+def get_sweep_vars(outdir):
+    '''
+    Get relevant sweep variables and their values by parsing outdir
+    '''
+    sweep_vars = {}
+    for subdir in outdir.parts:
+        parts = subdir.split(',')
+        if len(parts) == 1:
+            continue
+        stage = parts[0]
+        for part in parts[1:]:
+            var, value = part.split('=')
+            try:
+                value = int(value)
+            except ValueError:
+                pass
+            sweep_vars[f'{stage}.{var}'] = value
+    return sweep_vars

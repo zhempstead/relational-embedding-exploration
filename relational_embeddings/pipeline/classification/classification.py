@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 import tensorflow as tf
 
 from relational_embeddings.lib.eval_utils import plot_tf_history, report_metric
-from relational_embeddings.lib.utils import dataset_dir
+from relational_embeddings.lib.utils import dataset_dir, get_sweep_vars
 
 def classification(cfg, outdir, indir=None):
     """
@@ -72,34 +72,13 @@ def classification(cfg, outdir, indir=None):
         'model': cfg.classification.methods,
     })
     df['dataset'] = cfg.dataset.name
-    sweep_vars = get_sweep_vars(outdir, cfg)
+    sweep_vars = get_sweep_vars(outdir)
     for var, val in sweep_vars.items():
         df[var] = val
     df = df[['dataset'] + list(sweep_vars.keys()) + ['model', 'pscore_train', 'pscore_test']]
     df.to_csv(outdir / 'results.csv', index=False)
 
     print(f"Done with classification! Results at '{outdir}'")
-
-
-def get_sweep_vars(outdir, cfg):
-    '''
-    Get relevant sweep variables and their values by parsing outdir
-    '''
-    sweep_vars = {}
-    for subdir in outdir.parts:
-        parts = subdir.split(',')
-        if len(parts) == 1:
-            continue
-        stage = parts[0]
-        for part in parts[1:]:
-            var, value = part.split('=')
-            try:
-                value = int(value)
-            except ValueError:
-                pass
-            sweep_vars[f'{stage}.{var}'] = value
-    return sweep_vars
-
 
 
 def tee(fout, text):
