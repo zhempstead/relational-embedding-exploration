@@ -142,17 +142,18 @@ def quantize(df, strategy, cfg):
             quantized_col = df[col]
         if strategy[col]["int"] == "eqd_quantize":
             bins = [np.percentile(df[col], i * bin_percentile) for i in range(num_bins)]
-            quantized_col = np.digitize(df[col], bins)
+            quantized_col = pd.Series(np.digitize(df[col], bins))
         if strategy[col]["int"] == "eqw_quantize":
             # The '[:-1]' prevents the max value from being converted to num_bins+1
-            bins = np.histogram_bin_edges(df[col], bins=num_bins)[:-1]
+            bins = np.histogram_bin_edges(df[col].dropna(), bins=num_bins)[:-1]
             quantized_col = pd.Series(np.digitize(df[col], bins))
 
         quantized_col = quantized_col.astype(str)
 
         if augment:
+            sanitized_col = sanitize_col(col)
             # Special symbol to tell apart augmentation from space
-            quantized_col = str(col) + "_<#>_" + quantized_col.astype(str)
+            quantized_col = sanitized_col + "_<#>_" + quantized_col.astype(str)
 
         # Values that were originally null get put in the highest bin
         # Instead, set them to None
@@ -187,6 +188,9 @@ def lowercase_removepunct(df, col):
     df[col] = df[col].str.replace(",", " ")
     df[col] = df[col].str.replace("  ", " ")
     df[col] = df[col].str.strip()
+
+def sanitize_col(col):
+    return str(col).lower().strip().replace(" ", "_")
 
 
 if __name__ == "__main__":
