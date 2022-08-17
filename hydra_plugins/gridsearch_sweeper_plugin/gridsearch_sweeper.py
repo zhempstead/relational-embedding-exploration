@@ -97,8 +97,10 @@ class GridsearchSweeper(Sweeper):
                 simple_overrides.append(f"{key}={value}")
 
 
-        all_stage_tasks = None
-        prev_stage_tasks = None
+        tasks = {}
+        prev_stage = None
+        returns = []
+        initial_job_idx = 0
         for stage in self.pipeline:
             stage_overrides = []
             for key, values in stage_sweeps[stage]:
@@ -107,15 +109,18 @@ class GridsearchSweeper(Sweeper):
                 stage_tasks = [(stage, list(overrides)) for overrides in itertools.product(*stage_overrides)]
             else:
                 stage_tasks = [(stage, None)]
-            if all_stage_tasks is None:
-                prev_stage_tasks = [[st] for st in stage_tasks]
-                all_stage_tasks = prev_stage_tasks
+            if prev_stage is None:
+                tasks[stage] = [[st] for st in stage_tasks]
             else:
-                prev_stage_tasks = [list(prev) + [new] for prev, new in itertools.product(prev_stage_tasks, stage_tasks)]
-                all_stage_tasks += prev_stage_tasks
-        hydra_tasks = [task2hydra(t, simple_overrides) for t in all_stage_tasks]
-        self.validate_batch_is_legal(hydra_tasks)
-        return self.launcher.launch(hydra_tasks, initial_job_idx=0)
+                tasks[stage] = [list(prev) + [new] for prev, new in itertools.product(tasks[prev_stage], stage_tasks)]
+            prev_stage = stage
+            batch = [task2hydra(t, simple_overrides) for t in tasks[stage]]
+            self.validate_batch_is_legal(batch)
+            results = self.launcher.launch(batch, initial_job_idx=initial_job_idx)
+            initial_job_idx += len(batch)
+            returns.append(results)
+
+        return returns
 
 def task2hydra(task: List[Tuple[str, Optional[List[Tuple[str, str]]]]], simple_overrides: List[str]):
     subdir_path = []
