@@ -11,6 +11,7 @@ defaults:
   - _self_
   - pipeline: gridsearch
   - override hydra/sweeper: gridsearch
+  - override hydra/launcher: joblib
 
 multirun: true
 
