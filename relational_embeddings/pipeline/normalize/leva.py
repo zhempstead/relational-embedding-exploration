@@ -20,7 +20,7 @@ def leva_normalize(datadir, outdir, cfg):
     """
     strategies = dict()
     for infile in all_csv_in_path(datadir):
-        df = pd.read_csv(infile, encoding="latin1", sep=",", low_memory=False)
+        df = pd.read_csv(infile, sep=",", low_memory=False)
 
         strategy = get_strategy(df)
         strategies[infile.name] = strategy
