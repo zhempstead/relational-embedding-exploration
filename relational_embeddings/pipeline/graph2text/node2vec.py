@@ -9,30 +9,41 @@ Knowledge Discovery and Data Mining (KDD), 2016
 
 import random
 
+import numpy as np
 from numpy.random import choice
 
 # import pandas as pd
 from tqdm import tqdm
 
 from relational_embeddings.lib.graph_utils import read_graph
+from rwalk import rwalk
 
 def node2vec_graph2text(indir, outdir, cfg):
     infile = indir / "edgelist"
     outfile = outdir / "text.txt"
 
-    nx_G = read_graph(infile, cfg.weighted)
-    print("Reading Done!")
-    G = Graph(nx_G, cfg.p, cfg.q, cfg.weighted)
-    print("Creation Done!")
-    G.preprocess_transition_probs()
-    print("Preprocess Done!")
-    with open(outfile, "w") as f:
-        print("Walk iteration:")
-        for walk_iter in range(cfg.num_walks):
-            print(walk_iter + 1, "/", cfg.num_walks)
-            walks = G.simulate_walk(cfg.walk_length)
-            for walk in walks:
-                f.write(" ".join(walk) + "\n")
+    if cfg.weighted:
+        nx_G = read_graph(infile, cfg.weighted)
+        print("Reading Done!")
+        G = Graph(nx_G, cfg.p, cfg.q, cfg.weighted)
+        print("Creation Done!")
+        G.preprocess_transition_probs()
+        print("Preprocess Done!")
+        with open(outfile, "w") as f:
+            print("Walk iteration:")
+            for walk_iter in range(cfg.num_walks):
+                print(walk_iter + 1, "/", cfg.num_walks)
+                walks = G.simulate_walk(cfg.walk_length)
+                for walk in walks:
+                    f.write(" ".join(walk) + "\n")
+    else:
+        ptr, neighs = rwalk.read_edgelist(infile)
+        with open(outfile, "w") as f:
+            print("Walk iteration:")
+            for walk_iter in range(cfg.num_walks):
+                print(f"{outdir.name}:", walk_iter + 1, "/", cfg.num_walks)
+                walks = rwalk.random_walk(ptr, neighs, num_walks=1, num_steps=cfg.walk_length, nthread=1, seed=10)
+                np.savetxt(f, walks, fmt='%d')
     print("Walking Done!")
 
 

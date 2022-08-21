@@ -17,10 +17,8 @@ def word2vec_text2model(indir, outdir, cfg):
     infile = indir / "text.txt"
     outfile = outdir / "model"
 
-    with open(infile) as f:
-        text = [line.strip().split(" ") for line in f.readlines()]
     model = Word2Vec(
-        text,
+        corpus_file=str(infile),
         size=cfg.dimensions,
         window=cfg.window_size,
         min_count=0,
