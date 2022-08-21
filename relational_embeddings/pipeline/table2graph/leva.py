@@ -15,7 +15,7 @@ def leva_table2graph(indir, outdir, cfg):
     """
     edge_dfs = []
     for path in tqdm(all_csv_in_path(indir)):
-        df = pd.read_csv(path, encoding="latin1", sep=",", low_memory=False)
+        df = pd.read_csv(path, sep=",", low_memory=False)
         edge_df = make_edge_df(df)
         edge_df["table"] = path.stem
         edge_dfs.append(edge_df)

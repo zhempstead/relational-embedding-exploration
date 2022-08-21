@@ -41,7 +41,7 @@ def preprocess(cfg):
         
 
     for path in all_csv_in_path(location, exclude_base=True):
-        df = pd.read_csv(path, encoding="latin1", sep=",", low_memory=False)
+        df = pd.read_csv(path, sep=",", low_memory=False)
         if target_column[0] in df.columns:
             print(f"Dropping column '{target_column}' from '{path}'")
             df = df.drop(columns=target_column)
