@@ -25,7 +25,7 @@ def run(wdir, stage=None, *overrides):
     wdir = Path(wdir)
     is_multirun = 'multirun' in wdir.parts
     if stage is None:
-        stage = wdir.name
+        stage = wdir.name.split(',')[0]
         if not is_multirun:
             wdir = wdir.parent
     if overrides is None:
@@ -42,7 +42,6 @@ def run(wdir, stage=None, *overrides):
 
     with hydra.initialize(version_base=None, config_path="../hydra_conf"):
         cfg = hydra.compose(config_name="single_run", overrides=overrides)
-
     stage_idx = cfg.pipeline.index(stage)
     if stage_idx == 0:
         indir = None
