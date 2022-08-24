@@ -1,5 +1,7 @@
 method: word2vec
 dimensions: ${embedding.dimensions}
+skipgram: True
+hierarchical_softmax: False
 window_size: 10 # Context size for optimization
 iter: 10 # Number of epochs in SGD
 workers: 4 # Number of parallel workers

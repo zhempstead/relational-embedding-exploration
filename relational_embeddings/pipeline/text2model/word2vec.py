@@ -22,7 +22,8 @@ def word2vec_text2model(indir, outdir, cfg):
         size=cfg.dimensions,
         window=cfg.window_size,
         min_count=0,
-        sg=1,
+        sg=int(cfg.skipgram),
+        hs=int(cfg.hierarchical_softmax),
         workers=cfg.workers,
         iter=cfg.iter,
     )
