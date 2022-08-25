@@ -10,7 +10,7 @@ from relational_embeddings.lib.utils import get_sweep_vars
 
 def main(experiment_dir):
     outfile_rows = experiment_dir / 'hubness_rows.csv'
-    outfile_all = experiment_dir / 'hubness_rows.csv'
+    outfile_all = experiment_dir / 'hubness_all.csv'
 
     rows_records = []
     print("Row embeddings:")
