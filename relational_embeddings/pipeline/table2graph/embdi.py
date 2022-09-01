@@ -21,7 +21,7 @@ def embdi_table2graph(indir, outdir, cfg):
         edge_dfs.append(edge_df)
 
     edge_df = pd.concat(edge_dfs, ignore_index=True)
-    edge_df = format_rows(edge_df)
+    edge_df = format_rows_cols(edge_df)
     edge_df["weight"] = 1.0
 
     cc = TokenDict()
