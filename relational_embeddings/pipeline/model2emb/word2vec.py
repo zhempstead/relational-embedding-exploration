@@ -7,7 +7,10 @@ from relational_embeddings.lib.utils import make_symlink
 
 
 def word2vec_model2emb(indir, outdir, cfg, table_csv):
-    model = KeyedVectors.load_word2vec_format(indir / "model")
+    model_fname = "model"
+    if cfg.model_suffix is not None:
+        model_fname += f"_{cfg.model_suffix}"
+    model = KeyedVectors.load_word2vec_format(indir / model_fname)
     model_cnf = OmegaConf.load(indir / "model_cnf")
     outfile = outdir / "embeddings.csv"
 

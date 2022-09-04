@@ -2,6 +2,7 @@
 import time
 
 import numpy as np
+from omegaconf import OmegaConf
 from scipy import linalg
 import scipy.sparse as sp
 from scipy.special import iv
@@ -9,6 +10,7 @@ from sklearn import preprocessing
 from sklearn.utils.extmath import randomized_svd
 
 from relational_embeddings.lib.graph_utils import read_graph
+from relational_embeddings.lib.utils import make_symlink
 
 def proNE_graph2model(indir, outdir, cfg):
     infile = indir / "edgelist" 
@@ -17,7 +19,7 @@ def proNE_graph2model(indir, outdir, cfg):
 
     nx_G = read_graph(infile, cfg.weighted)
 
-    model = ProNE(nx_G, cfg.dimension)
+    model = ProNE(nx_G, cfg.dimensions)
     features_matrix = model.pre_factorization(model.matrix0, model.matrix0)
     embeddings_matrix = model.chebyshev_gaussian(model.matrix0, features_matrix, cfg.step, cfg.mu, cfg.theta)
 

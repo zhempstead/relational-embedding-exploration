@@ -1,5 +1,3 @@
 method: word2vec
-dimensions: ${embedding.dimensions}
-window_size: 10 # Context size for optimization
-iter: 10 # Number of epochs in SGD
 use_value_nodes: True
+model_suffix: null
