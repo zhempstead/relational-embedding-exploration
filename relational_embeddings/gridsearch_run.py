@@ -9,12 +9,11 @@ from relational_embeddings.pipeline.normalize import normalize
 from relational_embeddings.pipeline.table2graph import table2graph
 
 
-@hydra.main(version_base=None, config_path="../hydra_conf", config_name="gridsearch_run")
+@hydra.main(version_base=None, config_path="../hydra_conf", config_name="run")
 def run(cfg):
     """
     Build embedding and evaluate on downstream model
     """
-    print(cfg)
     if cfg.resume_workdir is not None:
         resume_subdir = Path(cfg.resume_workdir) / cfg.pipeline_subdir
         resume_subdir.mkdir(exist_ok=True)

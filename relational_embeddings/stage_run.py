@@ -23,34 +23,19 @@ STAGE2FUNC = {
 }
 
 @argh.arg('overrides', default=None)
-def run(wdir, stage=None, *overrides):
-    wdir = Path(wdir)
-    is_multirun = 'multirun' in wdir.parts
-    if stage is None:
-        stage = wdir.name.split(',')[0]
-        if not is_multirun:
-            wdir = wdir.parent
+def run(outdir, *overrides):
+    outdir = Path(outdir)
+    stage = outdir.name.split(',')[0]
     if overrides is None:
         overrides = []
-    if is_multirun:
-        overrides += ('multirun=True',)
-
-    if is_multirun:
-        outdir = wdir
-    else:
-        outdir = wdir / stage
-        if outdir.exists():
-            shutil.rmtree(outdir)
 
     with hydra.initialize(version_base=None, config_path="../hydra_conf"):
-        cfg = hydra.compose(config_name="single_run", overrides=overrides)
-    stage_idx = cfg.pipeline.index(stage)
+        cfg = hydra.compose(config_name="run", overrides=overrides, return_hydra_config=True)
+    stage_idx = cfg.hydra.sweeper.pipeline.index(stage)
     if stage_idx == 0:
         indir = None
-    elif is_multirun:
-        indir = wdir.parent
     else:
-        indir = wdir / cfg.pipeline[stage_idx - 1]
+        indir = outdir.parent
     run_stage(stage, cfg, outdir, indir=indir)
 
 

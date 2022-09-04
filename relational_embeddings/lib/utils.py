@@ -17,13 +17,10 @@ def make_symlink(source, link):
     link.symlink_to(os.path.relpath(source, start=link.parent))
 
 
-def prev_stage_dir(cwd, prev_stage, multirun):
-    if multirun:
-        while not cwd.name.startswith(prev_stage):
-            cwd = cwd.parent
-        return cwd
-    else:
-        return cwd.parent / prev_stage
+def prev_stage_dir(cwd, prev_stage):
+    while not cwd.name.startswith(prev_stage):
+        cwd = cwd.parent
+    return cwd
 
 
 def get_sweep_vars(outdir):

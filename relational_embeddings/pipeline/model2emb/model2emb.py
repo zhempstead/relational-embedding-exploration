@@ -11,7 +11,7 @@ def model2emb(cfg, outdir, indir=None):
     if indir is None:
         indir = outdir.parent
 
-    normalize_dir = prev_stage_dir(outdir, 'normalize', multirun=cfg.multirun)
+    normalize_dir = prev_stage_dir(outdir, 'normalize')
     base_csv = normalize_dir / 'base.csv'
 
     print(f"Producing embeddings using '{cfg.model2emb.method}' method...")
