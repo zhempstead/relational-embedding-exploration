@@ -1,6 +1,0 @@
-methods:
-  - logistic
-  #- random_forest
-  - nn
-random_seed: 10
-cv_splits: 5

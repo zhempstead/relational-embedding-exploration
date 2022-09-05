@@ -7,7 +7,7 @@ defaults:
   - graph2text: node2vec
   - text2model: word2vec
   - model2emb: word2vec
-  - classification: basic
+  - downstream: basic
   - override hydra/sweeper: gridsearch
   - override hydra/launcher: joblib
 
@@ -20,8 +20,8 @@ hydra:
   sweep:
     subdir: ${pipeline_subdir}
   sweeper:
-    pipeline: [normalize, table2graph, graph2text, text2model, model2emb, classification]
-    # pipeline: [normalize, table2graph, graph2model, model2emb, classification]
+    pipeline: [normalize, table2graph, graph2text, text2model, model2emb, downstream]
+    # pipeline: [normalize, table2graph, graph2model, model2emb, downstream]
   launcher:
     n_jobs: 24
     verbose: 1

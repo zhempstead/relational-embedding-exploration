@@ -11,14 +11,15 @@ import tensorflow as tf
 from relational_embeddings.lib.eval_utils import plot_tf_history, report_metric
 from relational_embeddings.lib.utils import dataset_dir, get_sweep_vars
 
-def classification(cfg, outdir, indir=None):
+def downstream(cfg, outdir, indir=None):
     """
-    Use model to produce embeddings on training and test data
+    Evaluate model on downstream ML task (as determined by dataset)
     """
     if indir is None:
         indir = outdir.parent
 
-    random_state = np.random.RandomState(seed=cfg.classification.random_seed)
+        task = cfg.dataset.downstream_task
+    random_state = np.random.RandomState(seed=cfg.downstream.random_seed)
 
     df_x = pd.read_csv(indir / 'embeddings.csv')
     df_y = pd.read_csv(dataset_dir(cfg.dataset.name) / 'base_y.csv')
@@ -26,10 +27,11 @@ def classification(cfg, outdir, indir=None):
     shuffled_idx = random_state.permutation(len(df_x))
     df_x = df_x.reindex(shuffled_idx)
     df_y = df_y.reindex(shuffled_idx)
-    df_y = pd.Categorical(df_y[cfg.dataset.target_column]).codes
+    if task == 'classification':
+        df_y = pd.Categorical(df_y[cfg.dataset.target_column]).codes
 
     
-    kfold = StratifiedKFold(n_splits=cfg.classification.cv_splits)
+    kfold = StratifiedKFold(n_splits=cfg.downstream.cv_splits)
 
     train_test_idxs = list(kfold.split(df_x, df_y))
 
@@ -37,28 +39,28 @@ def classification(cfg, outdir, indir=None):
     pscore_test_avgs = []
 
     with open(outdir / 'results.txt', 'w') as fout:
-        for method in cfg.classification.methods:
-            tee(fout, f"Classification method '{method}':")
-            method_func = METHOD2FUNC[method]
+        for method in cfg.downstream.methods_by_task[task]:
+            tee(fout, f"{task} method '{method}':")
+            method_func = TASK2METHOD2FUNC[task][method]
             pscore_trains = []
             pscore_tests = []
-            for it in range(cfg.classification.cv_splits):
-                tee(fout, f"  Iteration {it+1}/{cfg.classification.cv_splits}:")
+            for it in range(cfg.downstream.cv_splits):
+                tee(fout, f"  Iteration {it+1}/{cfg.downstream.cv_splits}:")
                 train_idx, test_idx = train_test_idxs[it]
                 df_train_x = df_x.iloc[train_idx]
                 df_test_x = df_x.iloc[test_idx]
                 df_train_y = df_y[train_idx]
                 df_test_y = df_y[test_idx]
                 pscore_train, pscore_test, cm, y_sample, pred_sample = \
-                    method_func(df_train_x, df_test_x, df_train_y, df_test_y, cfg.classification, outdir)
+                    method_func(df_train_x, df_test_x, df_train_y, df_test_y, cfg.downstream, outdir)
                 pscore_trains.append(pscore_train)
                 pscore_tests.append(pscore_test)
                 tee(fout, f"    real: {y_sample}")
                 tee(fout, f"    pred: {pred_sample}")
                 tee(fout, f"    Train accuracy {pscore_train}, Test accuracy {pscore_test}")
                 tee(fout, f"    Confusion matrix:\n{cm}")
-            pscore_train = sum(pscore_trains) / cfg.classification.cv_splits
-            pscore_test = sum(pscore_tests) / cfg.classification.cv_splits
+            pscore_train = sum(pscore_trains) / cfg.downstream.cv_splits
+            pscore_test = sum(pscore_tests) / cfg.downstream.cv_splits
 
             pscore_train_avgs.append(pscore_train)
             pscore_test_avgs.append(pscore_test)
@@ -69,7 +71,7 @@ def classification(cfg, outdir, indir=None):
     df = pd.DataFrame({
         'pscore_train': pscore_train_avgs,
         'pscore_test': pscore_test_avgs,
-        'model': cfg.classification.methods,
+        'model': cfg.downstream.methods,
     })
     df['dataset'] = cfg.dataset.name
     sweep_vars = get_sweep_vars(outdir)
@@ -78,7 +80,7 @@ def classification(cfg, outdir, indir=None):
     df = df[['dataset'] + list(sweep_vars.keys()) + ['model', 'pscore_train', 'pscore_test']]
     df.to_csv(outdir / 'results.csv', index=False)
 
-    print(f"Done with classification! Results at '{outdir}'")
+    print(f"Done with {task}! Results at '{outdir}'")
 
 
 def tee(fout, text):
@@ -135,9 +137,49 @@ def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
     return report_metric(model, X_train, X_test, y_train, y_test, argmax=True)
 
 
+def regression_task_elasticnet(X_train, X_test, y_train, y_test, cfg, outdir):
+    en = Pipeline([
+        ("normalizer", Normalizer()),
+        ("en", ElasticNet(normalize=True, random_state=7, max_iter=100))
+    ])
+    parameters = {
+        'en__alpha': [0.0001, 0.001, 0.01, 0.1, 0.5, 1],
+        'en__l1_ratio': [0.2, 0.5, 0.8]
+    }
+    greg = GridSearchCV(estimator=en, param_grid=parameters, cv=5, verbose=0)
+    greg.fit(X_train, y_train)
+    return report_metric(greg, X_train, X_test, y_train, y_test, metric=r2_score)
 
-METHOD2FUNC = {
-    'nn': classification_task_nn,
-    'logistic': classification_task_logr,
-    'random_forest': classification_task_rf,
+
+def regression_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
+    input_size = X_train.shape[1]
+    def baseline_model():
+        # create model
+        model = Sequential()
+        model.add(Dense(input_size, input_dim=input_size, kernel_initializer='normal', activation='relu'))
+        model.add(Dense(input_size // 2, kernel_initializer='normal', activation='relu'))
+        model.add(Dense(input_size // 4, kernel_initializer='normal', activation='relu'))
+        model.add(Dense(1, kernel_initializer='normal'))
+        # Compile model
+        model.compile(loss='mae', optimizer='adam')
+        return model
+    estimators = []
+    estimators.append(('standardize', StandardScaler()))
+    estimators.append(('mlp', KerasRegressor(build_fn=baseline_model, epochs=50, batch_size=10, verbose=1)))
+    pipeline = Pipeline(estimators)
+    pipeline.fit(X_train, y_train, validation_data=(X_test, y_test))
+    pipeline.evaluate(X_test, y_test, verbose=0)
+    return report_metric(pipeline, X_train, X_test, y_train, y_test, argmax=True, metric=r2_score)
+
+
+TASK2METHOD2FUNC = {
+    'classification': {
+        'nn': classification_task_nn,
+        'logistic': classification_task_logr,
+        'random_forest': classification_task_rf,
+    },
+    'regression': {
+        'nn': regression_task_nn,
+        'elastic': regression_task_elasticnet
+    },
 }

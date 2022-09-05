@@ -1,3 +1,4 @@
 name: genes
+downstream_task: classification
 target_column: Localization 
 random_seed: 10

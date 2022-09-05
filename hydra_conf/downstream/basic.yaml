@@ -1,0 +1,10 @@
+methods_by_task:
+  classification:
+    - logistic
+    #- random_forest
+    - nn
+  regression:
+    - elastic
+    - nn
+random_seed: 10
+cv_splits: 5

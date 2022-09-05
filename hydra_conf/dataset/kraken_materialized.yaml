@@ -1,3 +1,4 @@
 name: kraken-materialized
+downstream_task: classification
 target_column: result 
 random_seed: 10

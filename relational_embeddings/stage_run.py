@@ -12,7 +12,7 @@ from relational_embeddings.pipeline.graph2model import graph2model
 from relational_embeddings.pipeline.graph2text import graph2text
 from relational_embeddings.pipeline.text2model import text2model
 from relational_embeddings.pipeline.model2emb import model2emb
-from relational_embeddings.pipeline.classification import classification
+from relational_embeddings.pipeline.downstream import downstream
 
 STAGE2FUNC = {
     "normalize": normalize,
@@ -21,7 +21,7 @@ STAGE2FUNC = {
     "graph2text": graph2text,
     "text2model": text2model,
     "model2emb": model2emb,
-    "classification": classification,
+    "downstream": downstream,
 }
 
 def run(outdir):
