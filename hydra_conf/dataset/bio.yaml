@@ -1,0 +1,4 @@
+name: bio
+downstream_task: regression
+target_column: activity 
+random_seed: 10
