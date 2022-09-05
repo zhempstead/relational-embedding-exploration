@@ -1,9 +1,11 @@
 from pathlib import Path
 import shutil
+import sys
 
-import argh
 import hydra
+from omegaconf import OmegaConf
 
+from relational_embeddings.lib.utils import get_rootdir
 from relational_embeddings.pipeline.normalize import normalize
 from relational_embeddings.pipeline.table2graph import table2graph
 from relational_embeddings.pipeline.graph2model import graph2model
@@ -22,12 +24,9 @@ STAGE2FUNC = {
     "classification": classification,
 }
 
-@argh.arg('overrides', default=None)
-def run(outdir, *overrides):
-    outdir = Path(outdir)
+def run(outdir):
     stage = outdir.name.split(',')[0]
-    if overrides is None:
-        overrides = []
+    overrides = get_overrides(outdir)
 
     with hydra.initialize(version_base=None, config_path="../hydra_conf"):
         cfg = hydra.compose(config_name="run", overrides=overrides, return_hydra_config=True)
@@ -38,6 +37,17 @@ def run(outdir, *overrides):
         indir = outdir.parent
     run_stage(stage, cfg, outdir, indir=indir)
 
+def get_overrides(outdir):
+    # Sweep overrides
+    stage = outdir.name.split(',')[0]
+    overrides = [f'{stage}.{ov}' for ov in outdir.name.split(',')[1:]]
+
+    # Non-sweep overrides
+    rootdir = get_rootdir(outdir)
+    multirun_cfg = OmegaConf.load(rootdir / 'multirun.yaml')
+    overrides += [ov for ov in multirun_cfg.hydra.overrides.task if len(ov.split('=')[0].split('.')) == 1]
+
+    return overrides
 
 def run_stage(stage, cfg, outdir, indir=None):
     outdir.mkdir(exist_ok=True)
@@ -46,4 +56,4 @@ def run_stage(stage, cfg, outdir, indir=None):
 
 
 if __name__ == "__main__":
-    argh.dispatch_command(run)
+    run(Path(sys.argv[1]))

@@ -22,6 +22,11 @@ def prev_stage_dir(cwd, prev_stage):
         cwd = cwd.parent
     return cwd
 
+def get_rootdir(cwd):
+    while not cwd.parent.parent.name == "multirun":
+        cwd = cwd.parent
+    return cwd
+
 
 def get_sweep_vars(outdir):
     '''
