@@ -3,10 +3,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.linear_model import ElasticNet, LogisticRegression
+from sklearn.metrics import r2_score
+from sklearn.model_selection import GridSearchCV, KFold, StratifiedKFold
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import Normalizer, StandardScaler
 import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 
 from relational_embeddings.lib.eval_utils import plot_tf_history, report_metric
 from relational_embeddings.lib.utils import dataset_dir, get_sweep_vars
@@ -18,7 +22,7 @@ def downstream(cfg, outdir, indir=None):
     if indir is None:
         indir = outdir.parent
 
-        task = cfg.dataset.downstream_task
+    task = cfg.dataset.downstream_task
     random_state = np.random.RandomState(seed=cfg.downstream.random_seed)
 
     df_x = pd.read_csv(indir / 'embeddings.csv')
@@ -28,11 +32,12 @@ def downstream(cfg, outdir, indir=None):
     df_x = df_x.reindex(shuffled_idx)
     df_y = df_y.reindex(shuffled_idx)
     if task == 'classification':
-        df_y = pd.Categorical(df_y[cfg.dataset.target_column]).codes
+        df_y[cfg.dataset.target_column] = pd.Categorical(df_y[cfg.dataset.target_column]).codes
+        kfold_class = StratifiedKFold
+    elif task == 'regression':
+        kfold_class = KFold
 
-    
-    kfold = StratifiedKFold(n_splits=cfg.downstream.cv_splits)
-
+    kfold = kfold_class(n_splits=cfg.downstream.cv_splits)
     train_test_idxs = list(kfold.split(df_x, df_y))
 
     pscore_train_avgs = []
@@ -49,8 +54,8 @@ def downstream(cfg, outdir, indir=None):
                 train_idx, test_idx = train_test_idxs[it]
                 df_train_x = df_x.iloc[train_idx]
                 df_test_x = df_x.iloc[test_idx]
-                df_train_y = df_y[train_idx]
-                df_test_y = df_y[test_idx]
+                df_train_y = df_y.iloc[train_idx]
+                df_test_y = df_y.iloc[test_idx]
                 pscore_train, pscore_test, cm, y_sample, pred_sample = \
                     method_func(df_train_x, df_test_x, df_train_y, df_test_y, cfg.downstream, outdir)
                 pscore_trains.append(pscore_train)
@@ -71,7 +76,7 @@ def downstream(cfg, outdir, indir=None):
     df = pd.DataFrame({
         'pscore_train': pscore_train_avgs,
         'pscore_test': pscore_test_avgs,
-        'model': cfg.downstream.methods,
+        'model': cfg.downstream.methods_by_task[task],
     })
     df['dataset'] = cfg.dataset.name
     sweep_vars = get_sweep_vars(outdir)
@@ -156,10 +161,10 @@ def regression_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
     def baseline_model():
         # create model
         model = Sequential()
-        model.add(Dense(input_size, input_dim=input_size, kernel_initializer='normal', activation='relu'))
-        model.add(Dense(input_size // 2, kernel_initializer='normal', activation='relu'))
-        model.add(Dense(input_size // 4, kernel_initializer='normal', activation='relu'))
-        model.add(Dense(1, kernel_initializer='normal'))
+        model.add(tf.keras.layers.Dense(input_size, input_dim=input_size, kernel_initializer='normal', activation='relu'))
+        model.add(tf.keras.layers.Dense(input_size // 2, kernel_initializer='normal', activation='relu'))
+        model.add(tf.keras.layers.Dense(input_size // 4, kernel_initializer='normal', activation='relu'))
+        model.add(tf.keras.layers.Dense(1, kernel_initializer='normal'))
         # Compile model
         model.compile(loss='mae', optimizer='adam')
         return model
@@ -167,9 +172,8 @@ def regression_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
     estimators.append(('standardize', StandardScaler()))
     estimators.append(('mlp', KerasRegressor(build_fn=baseline_model, epochs=50, batch_size=10, verbose=1)))
     pipeline = Pipeline(estimators)
-    pipeline.fit(X_train, y_train, validation_data=(X_test, y_test))
-    pipeline.evaluate(X_test, y_test, verbose=0)
-    return report_metric(pipeline, X_train, X_test, y_train, y_test, argmax=True, metric=r2_score)
+    pipeline.fit(X_train, y_train)
+    return report_metric(pipeline, X_train, X_test, y_train, y_test, metric=r2_score)
 
 
 TASK2METHOD2FUNC = {
