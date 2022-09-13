@@ -39,11 +39,8 @@ def node2vec_graph2text(indir, outdir, cfg):
     else:
         ptr, neighs = rwalk.read_edgelist(infile)
         with open(outfile, "w") as f:
-            print("Walk iteration:")
-            for walk_iter in range(cfg.num_walks):
-                print(f"{outdir.name}:", walk_iter + 1, "/", cfg.num_walks)
-                walks = rwalk.random_walk(ptr, neighs, num_walks=1, num_steps=cfg.walk_length, nthread=1, seed=10)
-                np.savetxt(f, walks, fmt='%d')
+            walks = rwalk.random_walk(ptr, neighs, num_walks=cfg.num_walks, num_steps=cfg.walk_length, nthread=1, seed=10)
+            np.savetxt(f, walks, fmt='%d')
     print("Walking Done!")
 
 
