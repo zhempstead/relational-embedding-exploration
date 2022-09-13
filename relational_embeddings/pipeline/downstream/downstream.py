@@ -113,7 +113,7 @@ def classification_task_logr(X_train, X_test, y_train, y_test, cfg, outdir):
         "lr__l1_ratio": [0.1, 0.3, 0.9, 1]
     }
     greg = GridSearchCV(estimator=lr, param_grid=parameters, cv=2, verbose=0)
-    greg.fit(X_train, y_train)
+    greg.fit(X_train, y_train[y_train.columns[0]])
     return report_metric(greg, X_train, X_test, y_train, y_test)
 
 
