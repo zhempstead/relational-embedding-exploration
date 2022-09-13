@@ -4,9 +4,10 @@ import sys
 
 import pandas as pd
 
-GROUP_COLS = ['text2model.dimensions', 'model2emb.use_value_nodes']
+GROUP_COLS = ['graph2model.dimensions', 'text2model.dimensions', 'model2emb.use_value_nodes', 'graph2text.weighted']
 
 def main(experiment_dir):
+    pd.set_option('display.max_rows', 500)
     results = experiment_dir / 'results.csv'
     row_hubness = experiment_dir / 'hubness_rows.csv'
     full_hubness = experiment_dir / 'hubness_all.csv'
