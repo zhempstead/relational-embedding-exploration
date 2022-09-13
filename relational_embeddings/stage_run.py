@@ -5,7 +5,7 @@ import sys
 import hydra
 from omegaconf import OmegaConf
 
-from relational_embeddings.lib.utils import get_rootdir
+from relational_embeddings.lib.utils import get_rootdir, get_sweep_vars
 from relational_embeddings.pipeline.normalize import normalize
 from relational_embeddings.pipeline.table2graph import table2graph
 from relational_embeddings.pipeline.graph2model import graph2model
@@ -39,8 +39,8 @@ def run(outdir):
 
 def get_overrides(outdir):
     # Sweep overrides
-    stage = outdir.name.split(',')[0]
-    overrides = [f'{stage}.{ov}' for ov in outdir.name.split(',')[1:]]
+    sweep_vars = get_sweep_vars(outdir)
+    overrides = [f'{var}={val}' for var, val in sweep_vars.items()]
 
     # Non-sweep overrides
     rootdir = get_rootdir(outdir)
