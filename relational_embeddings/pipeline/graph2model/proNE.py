@@ -13,6 +13,8 @@ from relational_embeddings.lib.graph_utils import read_graph
 from relational_embeddings.lib.utils import make_symlink
 
 def proNE_graph2model(indir, outdir, cfg):
+    np.random.seed(cfg.random_seed)
+
     infile = indir / "edgelist" 
     outfile_sparse = outdir / "model_sparse"
     outfile_spectral = outdir / "model_spectral"
@@ -53,8 +55,7 @@ class ProNE():
         l = matrix.shape[0]
         smat = sp.csc_matrix(matrix)  # convert to sparse CSC format
         print('svd sparse', smat.data.shape[0] * 1.0 / l ** 2)
-        U, Sigma, VT = randomized_svd(
-            smat, n_components=self.dimension, n_iter=3, random_state=None)
+        U, Sigma, VT = randomized_svd(smat, n_components=self.dimension, n_iter=3, random_state=None)
         U = U * np.sqrt(Sigma)
         U = preprocessing.normalize(U, "l2")
         print('sparsesvd time', time.time() - t1)
@@ -63,8 +64,7 @@ class ProNE():
     def get_embedding_dense(self, matrix, dimension):
         # get dense embedding via SVD
         t1 = time.time()
-        U, s, Vh = linalg.svd(matrix, full_matrices=False,
-                              check_finite=False, overwrite_a=True)
+        U, s, Vh = linalg.svd(matrix, full_matrices=False, check_finite=False, overwrite_a=True)
         U = np.array(U)
         U = U[:, :dimension]
         s = s[:dimension]
