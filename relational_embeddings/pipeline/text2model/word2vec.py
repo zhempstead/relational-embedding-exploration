@@ -24,7 +24,8 @@ def word2vec_text2model(indir, outdir, cfg):
         min_count=0,
         sg=int(cfg.skipgram),
         hs=int(cfg.hierarchical_softmax),
-        workers=cfg.workers,
+        workers=1,
+        seed=int(cfg.random_seed),
         iter=cfg.iter,
     )
     model.wv.save_word2vec_format(outfile)

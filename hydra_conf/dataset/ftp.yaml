@@ -1,4 +1,3 @@
 name: ftp
 downstream_task: classification
 target_column: gender
-random_seed: 10

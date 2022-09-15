@@ -1,4 +1,3 @@
 name: school_subset
 downstream_task: classification
 target_column: class
-random_seed: 10

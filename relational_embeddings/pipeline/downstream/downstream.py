@@ -19,16 +19,17 @@ def downstream(cfg, outdir, indir=None):
     """
     Evaluate model on downstream ML task (as determined by dataset)
     """
+    tf.keras.utils.set_random_seed(cfg.downstream.random_seed)
+
     if indir is None:
         indir = outdir.parent
 
     task = cfg.dataset.downstream_task
-    random_state = np.random.RandomState(seed=cfg.downstream.random_seed)
 
     df_x = pd.read_csv(indir / 'embeddings.csv')
     df_y = pd.read_csv(dataset_dir(cfg.dataset.name) / 'base_y.csv')
 
-    shuffled_idx = random_state.permutation(len(df_x))
+    shuffled_idx = np.random.permutation(len(df_x))
     df_x = df_x.reindex(shuffled_idx)
     df_y = df_y.reindex(shuffled_idx)
     if task == 'classification':
@@ -95,7 +96,7 @@ def tee(fout, text):
 
 def classification_task_rf(X_train, X_test, y_train, y_test, cfg, outdir):
     rf = Pipeline([
-        ("rf", RandomForestClassifier(random_state=7, min_samples_split=5))
+        ("rf", RandomForestClassifier(min_samples_split=5))
     ])
     parameters = {
         'rf__n_estimators': [10, 20, 50, 70, 100, 250],
@@ -107,7 +108,7 @@ def classification_task_rf(X_train, X_test, y_train, y_test, cfg, outdir):
 
 def classification_task_logr(X_train, X_test, y_train, y_test, cfg, outdir):
     lr = Pipeline([
-        ("lr", LogisticRegression(random_state=7, penalty="elasticnet", solver="saga", max_iter=2000))
+        ("lr", LogisticRegression(penalty="elasticnet", solver="saga", max_iter=2000))
     ])
     parameters = {
         "lr__l1_ratio": [0.1, 0.3, 0.9, 1]
@@ -145,7 +146,7 @@ def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
 def regression_task_elasticnet(X_train, X_test, y_train, y_test, cfg, outdir):
     en = Pipeline([
         ("normalizer", Normalizer()),
-        ("en", ElasticNet(normalize=True, random_state=7, max_iter=100))
+        ("en", ElasticNet(normalize=True, max_iter=100))
     ])
     parameters = {
         'en__alpha': [0.0001, 0.001, 0.01, 0.1, 0.5, 1],

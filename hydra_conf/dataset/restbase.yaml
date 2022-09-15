@@ -1,4 +1,3 @@
 name: restbase
 downstream_task: regression
 target_column: review 
-random_seed: 10
