@@ -27,7 +27,7 @@ STAGE2FUNC = {
 def run(outdir):
     stage = outdir.name.split(',')[0]
     overrides = get_overrides(outdir)
-
+    
     with hydra.initialize(version_base=None, config_path="../hydra_conf"):
         cfg = hydra.compose(config_name="run", overrides=overrides, return_hydra_config=True)
     stage_idx = cfg.hydra.sweeper.pipeline.index(stage)

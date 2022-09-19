@@ -11,7 +11,6 @@ defaults:
   - override hydra/sweeper: gridsearch
   - override hydra/launcher: joblib
 
-random_seed: 10
 resume_workdir: null
 
 hydra:

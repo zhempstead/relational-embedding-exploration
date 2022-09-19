@@ -6,5 +6,5 @@ methods_by_task:
   regression:
     - elastic
     - nn
-random_seed: ${random_seed}
+random_seed: ${normalize.random_seed}
 cv_splits: 5
