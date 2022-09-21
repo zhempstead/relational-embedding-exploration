@@ -10,6 +10,7 @@ defaults:
   - downstream: basic
   - override hydra/sweeper: gridsearch
   - override hydra/launcher: joblib
+  - _self_
 
 resume_workdir: null
 
@@ -24,4 +25,4 @@ hydra:
     # pipeline: [normalize, table2graph, graph2model, model2emb, downstream]
   launcher:
     n_jobs: 24
-    verbose: 1
+    verbose: 51
