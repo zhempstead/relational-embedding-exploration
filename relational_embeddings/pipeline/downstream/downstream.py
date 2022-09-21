@@ -3,8 +3,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import ElasticNet, LogisticRegression
-from sklearn.metrics import r2_score
+from sklearn.linear_model import ElasticNetCV, LogisticRegression
+from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import GridSearchCV, KFold, StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import Normalizer, StandardScaler
@@ -145,16 +145,11 @@ def classification_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
 
 def regression_task_elasticnet(X_train, X_test, y_train, y_test, cfg, outdir):
     en = Pipeline([
-        ("normalizer", Normalizer()),
-        ("en", ElasticNet(normalize=True, max_iter=100))
+        ("standardize", StandardScaler()),
+        ("en", ElasticNetCV(l1_ratio=[.1, .5, .7, .9, .95, .99, 1]))
     ])
-    parameters = {
-        'en__alpha': [0.0001, 0.001, 0.01, 0.1, 0.5, 1],
-        'en__l1_ratio': [0.2, 0.5, 0.8]
-    }
-    greg = GridSearchCV(estimator=en, param_grid=parameters, cv=5, verbose=0)
-    greg.fit(X_train, y_train)
-    return report_metric(greg, X_train, X_test, y_train, y_test, metric=r2_score)
+    en.fit(X_train, y_train)
+    return report_metric(en, X_train, X_test, y_train, y_test, metric=mean_absolute_error)
 
 
 def regression_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
@@ -174,7 +169,7 @@ def regression_task_nn(X_train, X_test, y_train, y_test, cfg, outdir):
     estimators.append(('mlp', KerasRegressor(build_fn=baseline_model, epochs=50, batch_size=10, verbose=1)))
     pipeline = Pipeline(estimators)
     pipeline.fit(X_train, y_train)
-    return report_metric(pipeline, X_train, X_test, y_train, y_test, metric=r2_score)
+    return report_metric(pipeline, X_train, X_test, y_train, y_test, metric=mean_absolute_error)
 
 
 TASK2METHOD2FUNC = {
