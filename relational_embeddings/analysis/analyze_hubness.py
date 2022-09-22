@@ -4,7 +4,9 @@ import sys
 
 import pandas as pd
 
-GROUP_COLS = ['graph2model.dimensions', 'text2model.dimensions', 'model2emb.use_value_nodes', 'graph2text.weighted']
+DIM_COLS = ['graph2model.dimensions', 'text2model.dimensions']
+
+GROUP_COLS = DIM_COLS + ['model2emb.use_value_nodes', 'graph2text.weighted', 'model']
 
 def main(experiment_dir):
     pd.set_option('display.max_rows', 500)
@@ -16,6 +18,24 @@ def main(experiment_dir):
     df = pd.read_csv(results)
     rh = pd.read_csv(row_hubness)
     fh = pd.read_csv(full_hubness)
+
+    print("------")
+    print("Simple correlations")
+    rh_simple = rh[[c for c in rh.columns if c in df.columns] + ['gini']]
+    fh_simple = fh[[c for c in fh.columns if c in df.columns] + ['gini']]
+    dfr = df.merge(rh_simple)
+    dff = df.merge(fh)
+    try:
+        dim_col = [dc for dc in DIM_COLS if dc in dfr.columns][0]
+        dfr = dfr.groupby(dim_col)
+        dff = dff.groupby(dim_col)
+    except IndexError:
+        pass
+    print("Rows:")
+    print(dfr[['pscore_test', 'gini']].corr())
+    print("All:")
+    print(dff[['pscore_test', 'gini']].corr())
+    print("------")
 
     dfr = df.merge(rh)
     dff = df.merge(fh)
