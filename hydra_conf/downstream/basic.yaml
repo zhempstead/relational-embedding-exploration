@@ -2,7 +2,7 @@ methods_by_task:
   classification:
     - logistic
     #- random_forest
-    - nn
+    #- nn
   regression:
     - elastic
     #- nn
