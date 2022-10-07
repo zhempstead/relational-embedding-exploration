@@ -4,103 +4,98 @@
   
 ## Introduction
 
-  
-
 We apply relational embedding to boost the performance of machine learning models. The relational embedding captures information that exists across multiple tables and could attain a similar level of performance in downstream models with a minimal amount of human effort.
 
  
-We train the embedding in an unsupervised fashion through the following 5-stage pipeline: 
-
-- Dataset Preprocessing
-- Textification 
-- Graph Generation and Graph Cleaning 
-- Embedding Training 
-- Feeding Embedding to Downstream ML task 
-
-![System Pipeline](pics/Sys-pipeline.png)
-
-All of the following used default parameters that could be altered at the user's distinction. 
-
 ## Setup 
 To setup the environment, run, 
 ```
-virtualenv venv
+git submodule update --init rwalk/
+git submodule update --init scikit-hubness/
+
+virtualenv venv --python=python3
 source venv/bin/activate
 pip install -r requirements.txt
-pip instal -e scikit-hubness
+pip install -e scikit-hubness
 pip install -e .
-```  
-
-The Python version we are using is 3.6.13 and pip version is 21.0.1.
-
-Before running the pipeline on a specific dataset (for example, the sample dataset we are providing), please make sure the following folders are created: 
-
-- Under **data/**, create **strategies/**. This folder would save json files about how tables are textified into tokens when you run data/preprocess.py. 
-- Under **node2vec/** and **ProNE/**, create **emb/**. These folders would store embeddings generated from the two different methods. 
-- Create **graph/**, and a subfolder under **graph/** with the name of the dataset. This folder would contain dictionary mappings and edgelist files.
-- Under **node2vec/**, create a folder named **walks/**, this folder saves the random walks generated in the training process. 
-
-To run the pipeline over your dataset, please add relevant information in data/data_config.txt. 
-
-## Sample Dataset 
-The synthetic sample dataset we provide is used as a motivating example to show that embedding is beneficial for boosting downstream model performance. There are mainly three groups of students, type 1, type 2 and type 3. Each group corresponds to transactions of a particular items. The goal is to predict the "money" attribute in the base table. The embedding plot we included below shows that the embedding method correctly clusters all the students into 3 large categories. 
-
-
-## Dataset Preprocessing
-In this stage, we fill relevant dataset information in **data/data_config.txt** and indicate the base table \ columns that we are interested in using for the downstream task. At the same time, we determine the strategies we will be using for each attribute and saved them under **strategies/**.
-
-```
-python data/preprocess_data.py --task sample 
 ```
 
-## Textification and Graph Generation 
-We then textified the dataset into text tokens and used text tokens as nodes for the graph generation. There are two groups of edges in our graph -- row nodes, and value nodes. Row nodes represent a row in a specific dataset and value nodes represent values shared across multiple rows. Nodes are linked based on the similarity between their contents. We set thresholds to avoid tokens like "null" and spurious edges. 
+## Datasets
 
+A dataset should be placed in its own folder under `dataset`. A corresponding config file needs to be created under `hydra_conf/dataset`. Datasets should consist of csv files, and the file containing the column used as Y for the downstream task should be called 'base.csv'.
+
+Before a dataset can be used, we first preprocess it. Mainly, this consists of making copies of 'base.csv':
+- Without the Y column
+- With only the Y column
+
+To preprocess a dataset (in this example, 'genes'), run this once:
 ```
-python generate_graph.py --task sample 
-```
-
-Generated graph would be stored as one dictionary and one edgelist under **graph/**. 
-
-## Embedding Training 
-We provide two embedding training methods on the graph created from above, one based on random walks and one based on graph factorization methods. The random-walk based one is done by calling: 
-
-```
-cd node2vec/ 
-python src/main.py --task sample --dimensions 10
-```
- 
- The factorization-method based one is done by calling: 
- ```
- cd ProNE/ 
-python proNE.py --task sample --dimensions 10
- ```
-
-Note that our sample dataset is very small and is just used for motivating example, larger dimensions should be used on larger datasets. 
-
-Generated embedding and walks would be saved in the corresponding **emb/** folder. For the random-walk-based method, we observe due to the connectivity of the graph, some nodes are worse represented than other nodes, and adding limits on how many times walks can visit one node is beneficial for both embedding quality and downstream model performance. The embedding is suffixed with **_restart** under the same model name. The matrix factorization method generates two embeddings, one suffixed with **_sparse** and one with **_spectral** under the same model name. Embeddings generated are saved under the corresponding **emb/** folder. 
-
-## Embedding Enhancement (Optional and Ongoing) 
-Since we already have the representation of the relational data in the form of embeddings, we could find analogies of feature engineering techniques in the embedding space. Here are some ideas that we are exploring: 
-
-- Debiasing. If we know the ideal set of features that we would like to use, we could collapse the embedding to some directions that maximize those features so that we both reduce the dimension of the embedding and avoid bias in the downstream ML models at the same time. 
-- Dimension Reduction. Since the output of the embedding method would be high dimensional vectors, some downstream models are prone to overfit. Using sparse methods significantly improves downstream model performance in our experiments. Alternatively, is it possible to reduce the dimension without losing too much information? Several dimension reduction method has been tried but they do not exhibit great improvement here. 
-
-## Feeding into Downstream Tasks 
-We trained embeddings for row nodes and value nodes that are shared across multiple rows. Therefore, when feeding into downstream models, we also have the option to feed only use the rows / shared values. The default is to use only the row embeddings.
-
-```
-cd evaluation/
-python eval_model.py --task sample 
+source venv/bin/activate
+python relational_embeddings/preprocess.py dataset=genes
 ```
 
-It's possible to change the downstream task by altering the evaluation function to be other functions offered in **eval_util.py**.
+## Configuration
 
-## Visualizing embedding 
-**convert_emb_to_tsv.py** is a useful tool to convert embeddings from w2v format to tsv format. The tsv format embedding could be plotted in tensorflow projector. Here is a plot of the node2vec embedding for the sample dataset. To convert the embedding file into desired tsv form, run in the **/emb** folder the following comand, 
+This project uses [Hydra](https://github.com/facebookresearch/hydra) for configuration. All configuration lives under `hydra_conf`.
+
+All configuration can be overridden on the command line, or multiple values can be specified to sweep over all combinations in parallel. Examples will follow in a later section.
+
+## Architecture
+
+`relational_embeddings/gridsearch_run.py` lets us run an arbitrary pipeline (arbitrary in the sense that we can add whatever steps we want), with arbitrary variants for each pipeline step.
+
+`hydra_conf/run.yaml` specifies the defaults for both the pipeline (i.e. which steps get run) and also each pipeline step (i.e. when running the 'table2graph` pipeline step we can either create a leva-style graph or an embDI-style graph). The default pipeline is currently `leva_rwalk`, which is specified at `hydra_conf/pipeline/leva_rwalk`.
+
+The code for pipeline steps lives under `relational_embeddings/pipeline`. See `relational_embeddings/pipeline/table2graph` for a working example of a pipeline step with multiple variants.
+
+## Example
+
+Run the following command:
+```
+source venv/bin/activate
+PYTHONHASHSEED=0 python relational_embeddings/gridsearch_run.py dataset=genes graph2text.walk_length=20 text2model.iter=4 text2model.dimensions=8,16,64 model2emb.use_value_nodes=True,False
+```
+- `PYTHONHASHSEED=0` is necessary to make the pipeline fully deterministic modulo the random seed (which can be overridden via setting `normalize.random_seed`)
+- We are overriding the dataset and several step-specific parameters
+- In two cases (`text2model.dimensions` and `model2emb.use_value_nodes`) we are setting multiple values. This will make the script run that pipeline step (and all downstream steps) for all relevant combinations of the values. So there will be 3 different runs of `text2model` and 6 different runs of `model2emb`. Multiple runs within a pipeline step run in parallel.
+
+Once this finishes running, the output will be placed under `multirun/` (further nested by date and timestamp). The output directory for each pipeline step is nestled under its parent.
+
+Afterwards, it might make sense to run some analysis scripts on the data.
 
 ```
-python ../../convert_emb_to_tsv.py --task sample 
+# Gather the final downstream output into one csv file
+python relational_embeddings/analysis/gather_results.py multirun/<date>/<timestamp>
+
+# Calculate hubness metrics for all the different embeddings
+python relational_embeddings/analysis/hubness.py multirun/<date>/<timestamp>
 ```
 
-![Sample](pics/Background-ex.png)
+## Debugging / Resuming
+
+Unfortunately, running the full pipeline will elide errors. If an early step fails then later steps are likely to fail instantly with no error message (since they are expecting input that doesn't exist). You can see which jobs finished successfully by checking the output directory for the presence of an empty file called `DONE`.
+
+If a job isn't working as expected, you can debug it by running
+```
+python relational_embeddings/stage_run.py multirun/<date>/<timestamp>/<path to output directory of step to debug>
+```
+Once you have figured out what went wrong, you can resume the original full pipeline run by rerunning the original command with `resume_workdir=multirun/<date>/<timestamp>`. It will still create a new output directory (this is a limitation of the Hydra framework), but will actually resume work on the original output directory. When you rerun, it will skip any jobs marked with the `DONE` file. You can take advantage of this behavior in other ways - for instance, suppose your jobs completed successfully but the output was invalid due to a bug. Simply remove the `DONE` files in the jobs you want to rerun (including any downstream jobs) and rerun the command with `resume_workdir` specified.
+
+## Overview of pipeline steps
+
+### Leva-style random walks
+
+- normalize: tokenize, handle whitespace, etc. convert numerical columns into discrete bins (treated as strings).
+- table2graph: convert the table to a graph with nodes for each value, row, and (sometimes) column. Also create a dictionary mapping tokens to integers (since it's easier to deal with a graph with integer labels)
+- graph2text: do random walks on the graph to produce "text".
+- text2model: train on the text to produce an embeddings model.
+- model2emb: Produce concrete embeddings for each row in base.csv. The embeddings are either the embedding of the row token alone, or the sum of the embeddings of the row token and each value token in the node.
+- downstream: Train a simple model using the embeddings as X and the target_column originally from base.csv as Y. Report the training and test accuracy. In general we split the data into 5 groups. Each group is used as the test set once (the model is re-trained 5 times), and then we report the average trainging/test accuracy over all 5 splits.
+
+### Leva-style matrix factorization
+
+- normalize: same as above
+- table2graph: same as above
+- graph2model: Create the model directly from the graph by converting the edgelist into an adjacency matrix and factorizing.
+- model2emb: same as above
+- downstream: same as above
