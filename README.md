@@ -45,7 +45,7 @@ All configuration can be overridden on the command line, or multiple values can 
 
 `relational_embeddings/gridsearch_run.py` lets us run an arbitrary pipeline (arbitrary in the sense that we can add whatever steps we want), with arbitrary variants for each pipeline step.
 
-`hydra_conf/run.yaml` specifies the defaults for both the pipeline (i.e. which steps get run) and also each pipeline step (i.e. when running the 'table2graph` pipeline step we can either create a leva-style graph or an embDI-style graph). The default pipeline is currently `leva_rwalk`, which is specified at `hydra_conf/pipeline/leva_rwalk`.
+`hydra_conf/run.yaml` specifies the defaults for both the pipeline (i.e. which steps get run) and also each pipeline step (i.e. when running the `table2graph` pipeline step we can either create a leva-style graph or an embDI-style graph). The default pipeline is currently `leva_rwalk`, which is specified at `hydra_conf/pipeline/leva_rwalk`.
 
 The code for pipeline steps lives under `relational_embeddings/pipeline`. See `relational_embeddings/pipeline/table2graph` for a working example of a pipeline step with multiple variants.
 
