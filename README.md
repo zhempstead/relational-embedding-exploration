@@ -18,6 +18,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 pip install -e scikit-hubness
 pip install -e .
+(cd rwalk/rwalk; make all)
 ```
 
 ## Datasets
