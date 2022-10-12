@@ -1,0 +1,3 @@
+method: naive
+num_walks: 10
+random_seed: ${normalize.random_seed}

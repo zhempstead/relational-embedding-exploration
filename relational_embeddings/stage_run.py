@@ -8,6 +8,7 @@ from omegaconf import OmegaConf
 from relational_embeddings.lib.utils import get_rootdir, get_sweep_vars
 from relational_embeddings.pipeline.normalize import normalize
 from relational_embeddings.pipeline.table2graph import table2graph
+from relational_embeddings.pipeline.table2text import table2text
 from relational_embeddings.pipeline.graph2model import graph2model
 from relational_embeddings.pipeline.graph2text import graph2text
 from relational_embeddings.pipeline.text2model import text2model
@@ -17,6 +18,7 @@ from relational_embeddings.pipeline.downstream import downstream
 STAGE2FUNC = {
     "normalize": normalize,
     "table2graph": table2graph,
+    "table2text": table2text,
     "graph2model": graph2model,
     "graph2text": graph2text,
     "text2model": text2model,

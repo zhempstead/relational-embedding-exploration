@@ -6,6 +6,7 @@ defaults:
   # Pipeline defaults
   - normalize: leva
   - table2graph: leva
+  - table2text: naive
   - graph2model: ProNE
   - graph2text: node2vec
   - text2model: word2vec
