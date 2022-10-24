@@ -38,6 +38,7 @@ def leva_normalize(indir, outdir, cfg):
 def filter_target_col(df, target_col):
     if target_col in df.columns:
         return df.drop(target_col, axis=1)
+    return df
 
 
 def get_strategy(df):
