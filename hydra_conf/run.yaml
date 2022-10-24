@@ -1,9 +1,9 @@
 defaults:
-  - dataset: sample
   - embedding: small
   - pipeline: leva_rwalk
 
   # Pipeline defaults
+  - dataset: sample
   - normalize: leva
   - table2graph: leva
   - table2text: naive

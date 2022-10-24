@@ -1,3 +1,4 @@
 method: leva
 num_bins: 50
 random_seed: 10
+target_column: ${dataset.target_column}
