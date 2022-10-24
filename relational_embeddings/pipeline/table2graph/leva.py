@@ -30,7 +30,7 @@ def leva_table2graph(indir, outdir, cfg):
             val, row, weight = edge["val"], edge["row"], edge["weight"]
             decoded_val, decoded_row = cc.put(val), cc.put(row)
             edgelist.write(f"{decoded_val} {decoded_row} {weight}\n")
-    cc.save(outdir / "node_dict")
+    cc.save(outdir / "node_dict.feather")
 
 
 def make_edge_df(df):

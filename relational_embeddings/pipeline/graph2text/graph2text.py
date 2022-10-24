@@ -18,7 +18,7 @@ def graph2text(cfg, outdir, indir=None):
     else:
         raise ValueError("Unrecognized graph2text method '{cfg.graph2text.method}'")
 
-    make_symlink(indir / "node_dict", outdir / "word_dict")
+    make_symlink(indir / "node_dict.feather", outdir / "word_dict.feather")
     make_symlink(indir / "node_types", outdir / "word_types")
 
     print(f"Done converting to text! Output at '{outdir}'")

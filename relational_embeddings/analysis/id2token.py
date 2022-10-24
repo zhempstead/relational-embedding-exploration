@@ -9,9 +9,9 @@ def main(*files):
         out_file = in_file + '.tokens'
 
         wdir = Path(in_file).parent
-        tokendict_file = wdir / 'node_dict'
+        tokendict_file = wdir / 'node_dict.feather'
         if not tokendict_file.exists():
-            tokendict_file = wdir / 'word_dict'
+            tokendict_file = wdir / 'word_dict.feather'
         if not tokendict_file.exists():
             raise ValueError(f"No token dictionary file at '{wdir}'")
         tokendict = TokenDict()

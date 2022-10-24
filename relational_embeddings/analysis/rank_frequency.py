@@ -13,9 +13,9 @@ def main(*files):
         out_file_rows = wdir / (in_file.stem + '_rows.png')
         out_file_norows = wdir / (in_file.stem + '_norows.png')
 
-        tokendict_file = wdir / 'node_dict'
+        tokendict_file = wdir / 'node_dict.feather'
         if not tokendict_file.exists():
-            tokendict_file = wdir / 'word_dict'
+            tokendict_file = wdir / 'word_dict.feather'
         if not tokendict_file.exists():
             raise ValueError(f"No token dictionary file at '{wdir}'")
         tokendict = TokenDict()

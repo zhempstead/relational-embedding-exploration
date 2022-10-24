@@ -30,7 +30,7 @@ def word2vec_text2model(indir, outdir, cfg):
     )
     model.wv.save_word2vec_format(outfile)
 
-    make_symlink(indir / "word_dict", outdir / "word_dict")
+    make_symlink(indir / "word_dict.feather", outdir / "word_dict.feather")
 
     model_cnf = OmegaConf.create({"model_type": "word2vec"})
     word_types = OmegaConf.load(indir / "word_types")

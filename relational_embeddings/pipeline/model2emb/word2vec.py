@@ -15,7 +15,7 @@ def word2vec_model2emb(indir, outdir, cfg, table_csv):
     outfile = outdir / "embeddings.csv"
 
     word_dict = TokenDict()
-    word_dict.load(indir / "word_dict")
+    word_dict.load(indir / "word_dict.feather")
 
     df = pd.read_csv(table_csv)
     num_rows = len(df)

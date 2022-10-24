@@ -31,7 +31,7 @@ def embdi_table2graph(indir, outdir, cfg):
             decoded_val, decoded_row, decoded_col = cc.put(val), cc.put(row), cc.put(col)
             edgelist.write(f"{decoded_val} {decoded_row} {weight}\n")
             edgelist.write(f"{decoded_val} {decoded_col} {weight}\n")
-    cc.save(outdir / "node_dict")
+    cc.save(outdir / "node_dict.feather")
 
 
 def make_edge_df(df):

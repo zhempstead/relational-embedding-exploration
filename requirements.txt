@@ -5,6 +5,7 @@ gensim==3.8.3
 tqdm==4.47.0
 seaborn==0.11.1
 pandas==1.1.5
+pyarrow
 scikit-learn==1.1.2
 tensorflow>=2.4.1
 hydra-core==1.2

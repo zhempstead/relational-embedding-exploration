@@ -28,8 +28,6 @@ def proNE_graph2model(indir, outdir, cfg):
     save_embedding(outfile_sparse, features_matrix)
     save_embedding(outfile_spectral, embeddings_matrix)
 
-    make_symlink(indir / "node_dict", outdir / "node_dict")
-
     model_cnf = OmegaConf.create({"model_type": "ProNE"})
     node_types = OmegaConf.load(indir / "node_types")
     model_cnf = OmegaConf.merge(model_cnf, node_types)

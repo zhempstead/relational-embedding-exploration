@@ -1,5 +1,4 @@
-import pickle
-
+import pandas as pd
 
 class TokenDict:
     def __init__(self, path=None):
@@ -13,15 +12,14 @@ class TokenDict:
             self.load(path)
 
     def save(self, output_path):
-        with open(output_path, "wb") as f:
-            pickle.dump(self, f)
+        df = pd.DataFrame({"id": self.token2id.values(), "token": self.token2id.keys()})
+        df.to_feather(output_path)
 
     def load(self, input_path):
-        with open(input_path, "rb") as f:
-            tmp = pickle.load(f)
-        self.cnt = tmp.cnt
-        self.token2id = tmp.token2id
-        self.id2token = tmp.id2token
+        df = pd.read_feather(input_path)
+        self.cnt = len(df)
+        self.token2id = dict(zip(df['token'], df['id']))
+        self.id2token = dict(zip(df['id'], df['token']))
 
     def display(self):
         print("cnt", self.cnt)

@@ -18,7 +18,7 @@ def graph2model(cfg, outdir, indir=None):
     else:
         raise ValueError("Unrecognized graph2model method '{cfg.graph2model.method}'")
 
-    make_symlink(indir / "node_dict", outdir / "word_dict")
+    make_symlink(indir / "node_dict.feather", outdir / "word_dict.feather")
     make_symlink(indir / "node_types", outdir / "word_types")
 
     print(f"Done creating model! Output at '{outdir}'")

@@ -31,4 +31,4 @@ def naive_table2text(indir, outdir, cfg):
                 perm = random.permuted(df, axis=1) # Shuffles in-place within rows
                 np.savetxt(f, perm, fmt='%i')
 
-    cc.save(outdir / "word_dict")
+    cc.save(outdir / "word_dict.feather")
