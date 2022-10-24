@@ -6,6 +6,7 @@ import hydra
 from omegaconf import OmegaConf
 
 from relational_embeddings.lib.utils import get_rootdir, get_sweep_vars
+from relational_embeddings.pipeline.dataset import dataset
 from relational_embeddings.pipeline.normalize import normalize
 from relational_embeddings.pipeline.table2graph import table2graph
 from relational_embeddings.pipeline.table2text import table2text
@@ -16,6 +17,7 @@ from relational_embeddings.pipeline.model2emb import model2emb
 from relational_embeddings.pipeline.downstream import downstream
 
 STAGE2FUNC = {
+    "dataset": dataset,
     "normalize": normalize,
     "table2graph": table2graph,
     "table2text": table2text,

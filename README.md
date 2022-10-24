@@ -25,16 +25,6 @@ pip install -e .
 
 A dataset should be placed in its own folder under `dataset`. A corresponding config file needs to be created under `hydra_conf/dataset`. Datasets should consist of csv files, and the file containing the column used as Y for the downstream task should be called 'base.csv'.
 
-Before a dataset can be used, we first preprocess it. Mainly, this consists of making copies of 'base.csv':
-- Without the Y column
-- With only the Y column
-
-To preprocess a dataset (in this example, 'genes'), run this once:
-```
-source venv/bin/activate
-python relational_embeddings/preprocess.py dataset=genes
-```
-
 ## Configuration
 
 This project uses [Hydra](https://github.com/facebookresearch/hydra) for configuration. All configuration lives under `hydra_conf`.

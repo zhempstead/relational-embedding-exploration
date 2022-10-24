@@ -1,3 +1,4 @@
+method: real
 name: ftp
 downstream_task: classification
 target_column: gender

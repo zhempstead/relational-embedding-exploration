@@ -11,7 +11,7 @@ from relational_embeddings.lib.utils import all_csv_in_path
 DATE_PATTERN = re.compile("(\d+/\d+/\d+)")
 
 
-def leva_normalize(datadir, outdir, cfg):
+def leva_normalize(indir, outdir, cfg):
     """
     Normalize each table based on leva:
     - Quantize numerical columns
@@ -19,8 +19,9 @@ def leva_normalize(datadir, outdir, cfg):
     - Either single or multiple tokens per value depending on column grain size
     """
     strategies = dict()
-    for infile in all_csv_in_path(datadir):
+    for infile in all_csv_in_path(indir):
         df = pd.read_csv(infile, sep=",", low_memory=False)
+        df = filter_target_col(df, cfg.target_column)
 
         strategy = get_strategy(df)
         strategies[infile.name] = strategy
@@ -32,6 +33,11 @@ def leva_normalize(datadir, outdir, cfg):
     # Write strategies
     with open(outdir / "strategy.txt", "w") as json_file:
         json.dump(strategies, json_file, indent=4)
+
+
+def filter_target_col(df, target_col):
+    if target_col in df.columns:
+        return df.drop(target_col, axis=1)
 
 
 def get_strategy(df):

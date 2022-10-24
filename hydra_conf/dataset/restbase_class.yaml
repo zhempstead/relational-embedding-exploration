@@ -1,3 +1,4 @@
+method: real
 name: restbase-class
 downstream_task: classification
 target_column: review 

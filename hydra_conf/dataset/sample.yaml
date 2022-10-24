@@ -1,3 +1,4 @@
+method: real
 name: sample
 downstream_task: classification
 target_column: money

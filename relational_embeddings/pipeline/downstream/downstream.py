@@ -13,7 +13,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 
 from relational_embeddings.lib.eval_utils import plot_tf_history, report_metric
-from relational_embeddings.lib.utils import dataset_dir, get_sweep_vars
+from relational_embeddings.lib.utils import get_sweep_vars, prev_stage_dir
 
 def downstream(cfg, outdir, indir=None):
     """
@@ -27,7 +27,7 @@ def downstream(cfg, outdir, indir=None):
     task = cfg.dataset.downstream_task
 
     df_x = pd.read_csv(indir / 'embeddings.csv')
-    df_y = pd.read_csv(dataset_dir(cfg.dataset.name) / 'base_y.csv')
+    df_y = pd.read_csv(prev_stage_dir(outdir, "dataset") / "base.csv")[[cfg.dataset.target_column]]
 
     shuffled_idx = np.random.permutation(len(df_x))
     df_x = df_x.reindex(shuffled_idx)
@@ -79,11 +79,10 @@ def downstream(cfg, outdir, indir=None):
         'pscore_test': pscore_test_avgs,
         'model': cfg.downstream.methods_by_task[task],
     })
-    df['dataset'] = cfg.dataset.name
     sweep_vars = get_sweep_vars(outdir)
     for var, val in sweep_vars.items():
         df[var] = val
-    df = df[['dataset'] + list(sweep_vars.keys()) + ['model', 'pscore_train', 'pscore_test']]
+    df = df[list(sweep_vars.keys()) + ['model', 'pscore_train', 'pscore_test']]
     df.to_csv(outdir / 'results.csv', index=False)
 
     print(f"Done with {task}! Results at '{outdir}'")
