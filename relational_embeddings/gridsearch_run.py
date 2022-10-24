@@ -24,6 +24,13 @@ def run(cfg):
     if donefile.exists():
         print(f"{donefile} already exists... skipping this job")
         return
+
+    if cfg.pipeline_stage != cfg.pipeline[0]:
+        parent_donefile = Path.cwd() / '..' / 'DONE'
+        if not parent_donefile.exists():
+            print(f"Parent's {parent_donefile} doesn't exist... aborting this job!")
+            raise RuntimeError("Parent's donefile doesn't exist")
+
     stage_func = STAGE2FUNC[cfg.pipeline_stage]
     stage_func(cfg, Path.cwd())
     donefile.touch()
