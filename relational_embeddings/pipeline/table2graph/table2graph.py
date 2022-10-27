@@ -17,7 +17,7 @@ def table2graph(cfg, outdir, indir=None):
 
     if cfg.table2graph.method == "leva":
         leva_table2graph(indir, outdir, cfg.table2graph)
-        node_types = {"values": True, "columns": False, "rows": False}
+        node_types = {"values": True, "columns": False, "rows": True}
     elif cfg.table2graph.method == "embdi":
         embdi_table2graph(indir, outdir, cfg.table2graph)
         node_types = {"values": True, "columns": True, "rows": True}

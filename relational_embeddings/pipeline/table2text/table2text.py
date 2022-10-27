@@ -16,7 +16,7 @@ def table2text(cfg, outdir, indir=None):
 
     if cfg.table2text.method == "naive":
         naive_table2text(indir, outdir, cfg.table2text)
-        node_types = {"values": True, "columns": False, "rows": False}
+        node_types = {"values": True, "columns": False, "rows": cfg.table2text.add_row_nodes}
     else:
         raise ValueError(f"Unrecognized table2text method '{cfg.table2text.method}'")
 

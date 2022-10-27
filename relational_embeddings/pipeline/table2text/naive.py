@@ -22,9 +22,10 @@ def naive_table2text(indir, outdir, cfg):
             df = pd.read_csv(path, sep=",", low_memory=False)
 
             # Add row column with unique row tokens
-            df = df.reset_index()
-            df = df.rename(columns={'index': 'row'})
-            df['row'] = path.stem + "_row:" + df['row'].astype(str)
+            if cfg.add_row_nodes:
+                df = df.reset_index()
+                df = df.rename(columns={'index': 'row'})
+                df['row'] = path.stem + "_row:" + df['row'].astype(str)
 
             df = df.applymap(lambda val: int(cc.put(val))).to_numpy()
             for i in range(cfg.num_walks):
