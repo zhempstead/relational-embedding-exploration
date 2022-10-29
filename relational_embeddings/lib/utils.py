@@ -44,5 +44,9 @@ def get_sweep_vars(outdir):
                 value = int(value)
             except ValueError:
                 pass
-            sweep_vars[f'{stage}.{var}'] = value
+            if var.startswith("global."):
+                key = var
+            else:
+                key = f'{stage}.{var}'
+            sweep_vars[key] = value
     return sweep_vars

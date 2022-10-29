@@ -88,6 +88,8 @@ class GridsearchSweeper(Sweeper):
                 sweep_choices = override.sweep_string_iterator()
                 key = override.get_key_element()
                 stage = key.split('.')[0]
+                if stage == 'global':
+                    stage = self.pipeline[0]
                 if stage not in stage_sweeps:
                     raise ValueError(f"Sweep over '{key}' doesn't correspond to a pipeline stage")
                 stage_sweeps[stage].append((key, sweep_choices))
@@ -108,7 +110,7 @@ class GridsearchSweeper(Sweeper):
             if stage_overrides:
                 stage_tasks = [(stage, list(overrides)) for overrides in itertools.product(*stage_overrides)]
             else:
-                stage_tasks = [(stage, None)]
+                stage_tasks = [(stage, [])]
             if prev_stage is None:
                 tasks[stage] = [[st] for st in stage_tasks]
             else:
@@ -122,7 +124,7 @@ class GridsearchSweeper(Sweeper):
 
         return returns
 
-def task2hydra(task: List[Tuple[str, Optional[List[Tuple[str, str]]]]], simple_overrides: List[str]):
+def task2hydra(task: List[Tuple[str, List[Tuple[str, str]]]], simple_overrides: List[str]):
     subdir_path = []
     all_overrides = simple_overrides.copy()
     for stage, overrides in task:
@@ -132,20 +134,24 @@ def task2hydra(task: List[Tuple[str, Optional[List[Tuple[str, str]]]]], simple_o
     all_overrides += [f"+pipeline_stage={stage}", f"+pipeline_subdir='{'/'.join(subdir_path)}'"]
     return tuple(all_overrides)
 
-def get_subdir(stage: str, overrides: Optional[List[Tuple[str, str]]]):
+def get_subdir(stage: str, overrides: List[Tuple[str, str]]):
     '''
     Return the subdir for the given stage and set of overrides
     '''
-    if overrides is None:
+    if not len(overrides):
         return stage
     subdir = [stage]
     for key, value in overrides:
-        key_suffix = key.split('.', 1)[1]
-        try: 
+        key_prefix, key_suffix = key.split('.', 1)
+        if key_prefix == 'global':
+            outdir_key = key
+        else:
+            outdir_key = key_suffix
+        try:
             # So directories of int overrides have nice sort order
-            subdir.append(f"{key_suffix}={int(value):04d}")
+            subdir.append(f"{outdir_key}={int(value):04d}")
         except ValueError:
-            subdir.append(f"{key_suffix}={value}")
+            subdir.append(f"{outdir_key}={value}")
     return ",".join(subdir)
 
 
