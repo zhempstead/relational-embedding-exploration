@@ -1,3 +1,4 @@
+task: ${dataset.downstream_task}
 methods_by_task:
   classification:
     - logistic

@@ -50,3 +50,9 @@ def get_sweep_vars(outdir):
                 key = f'{stage}.{var}'
             sweep_vars[key] = value
     return sweep_vars
+
+
+def tee(fout, text):
+    print(text)
+    fout.write(text)
+    fout.write("\n")
