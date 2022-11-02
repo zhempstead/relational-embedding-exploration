@@ -1,6 +1,7 @@
 defaults:
   - embedding: small
   - pipeline: leva_rwalk
+  - global: defaults
 
   # Pipeline defaults
   - dataset: sample

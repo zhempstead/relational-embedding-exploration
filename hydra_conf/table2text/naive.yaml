@@ -1,4 +1,4 @@
 method: naive
 num_walks: 10
 add_row_nodes: True
-random_seed: ${normalize.random_seed}
+random_seed: ${global.random_seed}

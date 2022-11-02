@@ -4,4 +4,4 @@ num_walks: 10
 p: 1 # Return hyperparameter
 q: 1 # Inout hyperparameter
 weighted: False # If false, treat all graph weights as 1
-random_seed: ${normalize.random_seed}
+random_seed: ${global.random_seed}
