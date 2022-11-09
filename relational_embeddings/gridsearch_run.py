@@ -1,12 +1,8 @@
+import importlib
 import os
 from pathlib import Path
 
 import hydra
-
-from relational_embeddings.stage_run import STAGE2FUNC
-
-from relational_embeddings.pipeline.normalize import normalize
-from relational_embeddings.pipeline.table2graph import table2graph
 
 
 @hydra.main(version_base=None, config_path="../hydra_conf", config_name="run")
@@ -31,7 +27,7 @@ def run(cfg):
             print(f"Parent's {parent_donefile} doesn't exist... aborting this job!")
             raise RuntimeError("Parent's donefile doesn't exist")
 
-    stage_func = STAGE2FUNC[cfg.pipeline_stage]
+    stage_func = getattr(importlib.import_module(f"relational_embeddings.pipeline.{cfg.pipeline_stage}"), cfg.pipeline_stage)
     stage_func(cfg, Path.cwd())
     donefile.touch()
 
