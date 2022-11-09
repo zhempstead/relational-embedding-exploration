@@ -19,11 +19,13 @@ def make_symlink(source, link):
 
 def prev_stage_dir(cwd, prev_stage):
     while not cwd.name.startswith(prev_stage):
+        if cwd.parent == cwd:
+            raise ValueError(f"Unrecognized previous stage '{prev_stage}'")
         cwd = cwd.parent
     return cwd
 
 def get_rootdir(cwd):
-    while not cwd.parent.parent.name == "multirun":
+    while not (cwd / "multirun.yaml").exists():
         cwd = cwd.parent
     return cwd
 
