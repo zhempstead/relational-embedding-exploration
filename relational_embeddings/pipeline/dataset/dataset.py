@@ -3,11 +3,13 @@ from pathlib import Path
 from hydra.utils import get_original_cwd
 
 from relational_embeddings.pipeline.dataset.real import real_dataset
+from relational_embeddings.pipeline.dataset.single_join import single_join_dataset
+#from relational_embeddings.pipeline.dataset.double_join import double_join_dataset
 
 
 def dataset(cfg, outdir, indir=None):
     """
-    Normalize input tables
+    Symlink real dataset or create synthetic dataset
     """
     assert indir is None, "dataset should be the first step in the pipeline"
 
@@ -15,7 +17,11 @@ def dataset(cfg, outdir, indir=None):
 
     if cfg.dataset.method == "real":
         real_dataset(outdir, cfg.dataset)
+    elif cfg.dataset.method == "single_join":
+        single_join_dataset(outdir, cfg.dataset)
+    #elif cfg.dataset.method == "double_join":
+    #    double_join_dataset(outdir, cfg.dataset)
     else:
         raise ValueError("Unrecognized dataset method '{cfg.dataset.method}'")
 
-    print(f"Done normalizing! Output at '{outdir}'")
+    print(f"Done with dataset! Output at '{outdir}'")

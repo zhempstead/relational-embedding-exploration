@@ -1,0 +1,10 @@
+method: single_join
+secondary_tables: 4
+truth_tables: 1
+string_columns: 20
+unique_tokens: 50
+num_rows: 10000
+num_fks: ${dataset.secondary_tables}
+downstream_task: classification
+target_column: y
+random_seed: ${global.random_seed}
