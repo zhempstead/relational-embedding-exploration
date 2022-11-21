@@ -7,5 +7,6 @@ methods_by_task:
   regression:
     - elastic
     #- nn
+model_suffix: ${model2emb.model_suffix}
 random_seed: ${global.random_seed}
 cv_splits: 5

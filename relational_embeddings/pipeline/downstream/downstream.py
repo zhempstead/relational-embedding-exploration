@@ -1,8 +1,8 @@
+import importlib
+
 import pandas as pd
 
 from relational_embeddings.lib.utils import get_sweep_vars, prev_stage_dir
-from relational_embeddings.pipeline.downstream.classification import classification_downstream
-from relational_embeddings.pipeline.downstream.regression import regression_downstream
 
 def downstream(cfg, outdir, indir=None):
     """
@@ -16,12 +16,8 @@ def downstream(cfg, outdir, indir=None):
     df_x = pd.read_csv(indir / 'embeddings.csv')
     df_y = pd.read_csv(prev_stage_dir(outdir, "dataset") / "base.csv")[[cfg.dataset.target_column]]
 
-    if cfg.downstream.task == "classification":
-        df = classification_downstream(df_x, df_y, outdir, cfg.downstream)
-    elif cfg.downstream.task == "regression":
-        df = regression_downstream(df_x, df_y, outdir, cfg.downstream)
-    else:
-        raise ValueError("Unrecognized downstream task '{cfg.downstream.task}'")
+    function = get_pipeline_function("downstream", cfg.downstream.task)
+    df = function(df_x, df_y, outdir, cfg.downstream)
 
     orig_cols = list(df.columns)
     sweep_vars = get_sweep_vars(outdir)
@@ -31,3 +27,13 @@ def downstream(cfg, outdir, indir=None):
     df.to_csv(outdir / 'results.csv', index=False)
 
     print(f"Done with {cfg.downstream.task}! Results at '{outdir}'")
+
+def get_pipeline_function(pipeline_step, method):
+    funcname = f"{method}_{pipeline_step}"
+    try:
+        module = importlib.import_module(f"relational_embeddings.pipeline.{pipeline_step}.{method}")
+        return getattr(module, funcname)
+    except ImportError:
+        raise ValueError(f"Unrecognized method '{method}' for pipeline step {pipeline_step}")
+    except AttributeError:
+        raise ValueError(f"There should be a function called {funcname} in '{method}.py' for pipeline step {pipeline_step}")
