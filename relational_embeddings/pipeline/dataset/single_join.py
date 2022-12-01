@@ -60,7 +60,7 @@ def single_join_dataset(outdir, cfg):
         if table_id < cfg.truth_tables:
             df["col0"] = f"truth_{table_id}_" + truth_col
 
-        df.to_csv(outdir / f"table_{table_id}.csv")
+        df.to_csv(outdir / f"table_{table_id}.csv", index=False)
 
 def gen_truth_col(num_rows, num_unique_tokens, random):
     tiled = np.tile(np.arange(num_unique_tokens), num_rows // num_unique_tokens + 1)[:num_rows]
