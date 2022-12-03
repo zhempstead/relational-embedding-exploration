@@ -1,6 +1,8 @@
 method: node2vec
 walk_length: 40 # Length of walk per source
-num_walks: 10
+#num_walks: 10
+num_walks: null
+token_repeats: 400
 p: 1 # Return hyperparameter
 q: 1 # Inout hyperparameter
 weighted: False # If false, treat all graph weights as 1

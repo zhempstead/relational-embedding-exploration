@@ -1,4 +1,6 @@
 method: naive
-num_walks: 10
+#num_walks: 10
+num_walks: null
+token_repeats: 400
 add_row_nodes: True
 random_seed: ${global.random_seed}

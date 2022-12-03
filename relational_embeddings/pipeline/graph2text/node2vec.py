@@ -18,8 +18,17 @@ from relational_embeddings.lib.graph_utils import read_graph
 from rwalk import rwalk
 
 def node2vec_graph2text(indir, outdir, cfg):
+    if (cfg.num_walks is None) == (cfg.token_repeats is None):
+        raise ValueError("Specify only one of cfg.num_walks, cfg.token_repeats")
+    if (cfg.token_repeats is not None) and (cfg.token_repeats % cfg.walk_length != 0):
+        raise ValueError("cfg.token_repeats must be divisible by cfg.walk_length")
     infile = indir / "edgelist"
     outfile = outdir / "text.txt"
+
+    num_walks = cfg.num_walks
+    if num_walks is None:
+        num_walks = cfg.token_repeats // cfg.walk_length
+        print(f"Setting num_walks to {num_walks} for walk length of {cfg.walk_length} and token repeats of {cfg.token_repeats}")
 
     if cfg.weighted:
         nx_G = read_graph(infile, cfg.weighted)
@@ -30,16 +39,16 @@ def node2vec_graph2text(indir, outdir, cfg):
         print("Preprocess Done!")
         with open(outfile, "w") as f:
             print("Walk iteration:")
-            for walk_iter in range(cfg.num_walks):
-                print(walk_iter + 1, "/", cfg.num_walks)
-                walks = G.simulate_walk(cfg.walk_length)
+            for walk_iter in range(num_walks):
+                print(walk_iter + 1, "/", num_walks)
+                walks = G.simulate_walk(cfg.walk_length - 1)
                 for walk in walks:
                     f.write(" ".join(walk) + "\n")
     else:
         ptr, neighs = rwalk.read_edgelist(infile)
         with open(outfile, "w") as f:
             walks = rwalk.random_walk(
-                ptr, neighs, num_walks=cfg.num_walks, num_steps=cfg.walk_length, nthread=1,
+                ptr, neighs, num_walks=num_walks, num_steps = (cfg.walk_length - 1), nthread=1,
                 seed=cfg.random_seed)
             np.savetxt(f, walks, fmt='%d')
     print("Walking Done!")
