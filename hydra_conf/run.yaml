@@ -1,5 +1,5 @@
 defaults:
-  - embedding: small
+  - embedding: regular
   - pipeline: leva_rwalk
   - global: defaults
 
