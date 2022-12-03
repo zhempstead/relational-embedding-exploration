@@ -3,5 +3,5 @@ dimensions: ${embedding.dimensions}
 skipgram: True
 hierarchical_softmax: False
 window_size: 10 # Context size for optimization
-iter: 10 # Number of epochs in SGD
+epochs: 10 # Number of epochs in SGD
 random_seed: ${global.random_seed}
