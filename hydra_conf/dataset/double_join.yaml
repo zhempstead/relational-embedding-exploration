@@ -1,0 +1,10 @@
+method: double_join
+secondary_tables: 2
+tertiary_tables: 2
+truth_tables: 1
+string_columns: 4
+unique_tokens: 10
+num_rows: 2000
+downstream_task: classification
+target_column: y
+random_seed: ${global.random_seed}

@@ -4,7 +4,7 @@ from hydra.utils import get_original_cwd
 
 from relational_embeddings.pipeline.dataset.real import real_dataset
 from relational_embeddings.pipeline.dataset.single_join import single_join_dataset
-#from relational_embeddings.pipeline.dataset.double_join import double_join_dataset
+from relational_embeddings.pipeline.dataset.double_join import double_join_dataset
 
 
 def dataset(cfg, outdir, indir=None):
@@ -19,9 +19,9 @@ def dataset(cfg, outdir, indir=None):
         real_dataset(outdir, cfg.dataset)
     elif cfg.dataset.method == "single_join":
         single_join_dataset(outdir, cfg.dataset)
-    #elif cfg.dataset.method == "double_join":
-    #    double_join_dataset(outdir, cfg.dataset)
+    elif cfg.dataset.method == "double_join":
+        double_join_dataset(outdir, cfg.dataset)
     else:
-        raise ValueError("Unrecognized dataset method '{cfg.dataset.method}'")
+        raise ValueError(f"Unrecognized dataset method '{cfg.dataset.method}'")
 
     print(f"Done with dataset! Output at '{outdir}'")
