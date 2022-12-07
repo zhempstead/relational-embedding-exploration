@@ -1,0 +1,9 @@
+method: single_table
+secondary_tables: 0
+string_columns: 10
+truth_columns: 3
+unique_tokens: 10
+num_rows: 2000
+downstream_task: regression
+target_column: y
+random_seed: ${global.random_seed}
