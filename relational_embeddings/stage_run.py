@@ -29,7 +29,7 @@ def get_overrides(outdir):
     # Non-sweep overrides
     rootdir = get_rootdir(outdir)
     multirun_cfg = OmegaConf.load(rootdir / 'multirun.yaml')
-    overrides += [ov for ov in multirun_cfg.hydra.overrides.task if len(ov.split('=')[0].split('.')) == 1]
+    overrides += [ov for ov in multirun_cfg.hydra.overrides.task if ',' not in ov]
 
     return overrides
 
