@@ -1,5 +1,6 @@
 from collections import defaultdict
 import datetime as dt
+import itertools
 import json
 import re
 
@@ -26,6 +27,11 @@ def single_join_dataset(outdir, cfg):
     - num_fks: how many foreign keys in the base table
       (if 1, all secondary tables have the same foreign key reference.
       If equal to secondary_tables, each secondary table has its own fkey reference to the base table)
+    - association_table: if true, create an association table with pairs of values from the
+      first 30% of each unique string column values
+    - association_num_rows: if > 0, create an association table with random pairs of string values
+      taken from the first 30% of each unique string column values, to see if the extra attention
+      devoted to these values improves accuracy on these values.
 
     The classification task will set the Y column to be identical to the first string column of the
     first secondary table.
@@ -62,6 +68,11 @@ def single_join_dataset(outdir, cfg):
 
         df.to_csv(outdir / f"table_{table_id}.csv", index=False)
 
+    if cfg.association_num_rows > 0:
+        df_assoc = make_association_df(cfg, random)
+        df_assoc.to_csv(outdir / "associations.csv", index=False)
+
+
 def gen_truth_col(num_rows, num_unique_tokens, random):
     tiled = np.tile(np.arange(num_unique_tokens), num_rows // num_unique_tokens + 1)[:num_rows]
     return pd.Series(random.permutation(tiled)).astype(str)
@@ -78,3 +89,25 @@ def add_string_cols(df, num_cols, num_unique_tokens, prefix, random):
         ids = pd.Series(random.permutation(tiled))
         df[cname] = tprefix + ids.astype(str)
     return df
+
+
+def make_association_df(cfg, random):
+    base_token_prefixes = [f"base_col{c}" for c in range(cfg.string_columns)]
+    secondary_tables_cols = itertools.product(range(cfg.secondary_tables), range(cfg.string_columns))
+    secondary_token_prefixes = [secondary_token_prefix(t, c, cfg.truth_tables) for t, c in secondary_tables_cols]
+    token_prefixes = base_token_prefixes + secondary_token_prefixes
+    token_suffixes = range(cfg.unique_tokens // 3)
+    tokens = [f"{p}_{s}" for p, s in itertools.product(token_prefixes, token_suffixes)]
+
+    repeats = cfg.association_num_rows // len(tokens)
+    tokens = tokens * repeats
+    df = pd.DataFrame({'left': tokens.copy(), 'right': tokens.copy()})
+    random.shuffle(df['left'].to_numpy())
+    random.shuffle(df['right'].to_numpy())
+    return df
+
+def secondary_token_prefix(table_id, col_id, num_truth_tables):
+    if table_id < num_truth_tables and col_id == 0:
+        return f"truth_{table_id}"
+    else:
+        return f"table_{table_id}_col{col_id}"

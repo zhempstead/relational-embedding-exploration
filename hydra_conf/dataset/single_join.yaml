@@ -5,6 +5,7 @@ string_columns: 4
 unique_tokens: 10
 num_rows: 2000
 num_fks: ${dataset.secondary_tables}
+association_num_rows: 0
 downstream_task: classification
 target_column: y
 random_seed: ${global.random_seed}
