@@ -38,8 +38,10 @@ R
     x_embs = df_x.to_numpy()
     cs = cosine_similarity(x_embs, unique_truth_embs)
     predictions = unique_ys[np.argmax(cs, axis=1)]
-    score = sum(predictions == df_y[target_column]) / len(df_y)
-    return pd.DataFrame({'model': ["cosine"], 'pscore_train': [score], 'pscore_test': [score]})
+    df_y_filter = df_y['y'].str.split('_').str[1] < '3'
+    full_score = sum(predictions == df_y[target_column]) / len(df_y)
+    restricted_score = sum(predictions[df_y_filter] == df_y[df_y_filter][target_column]) / len(df_y[df_y_filter])
+    return pd.DataFrame({'model': ["cosine"], 'pscore_train': [full_score], 'pscore_test': [restricted_score]})
 
 
 def cosine_similarity(A, B):
