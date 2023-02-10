@@ -75,7 +75,7 @@ def embdi_match_attribute(df, num_good, seed, model, word_dict):
             token_odd = df.drop(col, axis=1).sample(random_state=seed).sample(axis=1, random_state=seed).iloc[0][0]
             if identifies_odd_one_out(tokens, token_odd, model, word_dict):
                 successes += 1
-        return successes, len(df.columns)*20
+    return successes, len(df.columns)*20
 
 def embdi_match_row(df, num_good, seed, model, word_dict):
     successes = 0
