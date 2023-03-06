@@ -4,4 +4,5 @@ skipgram: True
 hierarchical_softmax: False
 window_size: 5 # Context size for optimization
 epochs: 10 # Number of epochs in SGD
+workers: 1 # If set to more than 1, may not be fully deterministic
 random_seed: ${global.random_seed}
