@@ -22,6 +22,9 @@ def leva_normalize(indir, outdir, cfg):
     for infile in all_csv_in_path(indir):
         df = pd.read_csv(infile, sep=",", low_memory=False)
         df = filter_target_col(df, cfg.target_column)
+        if "index" in df.columns:
+            # Messes with pandas reset_index() otherwise
+            df = df.rename(columns={'index': 'index_col'})
 
         strategy = get_strategy(df)
         strategies[infile.name] = strategy
