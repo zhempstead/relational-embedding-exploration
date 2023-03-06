@@ -13,6 +13,7 @@ defaults:
   - text2model: word2vec
   - model2emb: word2vec
   - downstream: basic
+  - intrinsic: metrics
 
   - override hydra/sweeper: gridsearch
   - override hydra/launcher: joblib

@@ -1,1 +1,1 @@
-[dataset, normalize, table2text, text2model, model2emb, downstream]
+[dataset, normalize, table2text, text2model, model2emb, downstream, intrinsic]
