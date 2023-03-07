@@ -2,10 +2,12 @@ import os
 from pathlib import Path
 
 
-def all_csv_in_path(path, exclude_base=False):
+def all_csv_in_path(path, exclude_base=False, exclude_er_map=False):
     files = [f for f in path.iterdir() if f.is_file() and f.name.endswith(".csv")]
     if exclude_base:
         files = [f for f in files if not f.name.startswith("base")]
+    if exclude_er_map:
+        files = [f for f in files if not f.name == 'er_mapping.csv']
     return files
 
 

@@ -32,7 +32,7 @@ def naive_table2text(indir, outdir, cfg):
     if num_walks is None:
         print("Checking corpus size...")
         single_pass_size = 0
-        for path in tqdm(all_csv_in_path(indir)):
+        for path in tqdm(all_csv_in_path(indir, exclude_er_map=True)):
             df = pd.read_csv(path, sep=",", low_memory=False)
 
             if cfg.add_row_nodes:
@@ -54,7 +54,7 @@ def naive_table2text(indir, outdir, cfg):
         else:
             dictput = lambda val: int(cc.put(val))
 
-        for path in tqdm(all_csv_in_path(indir)):
+        for path in tqdm(all_csv_in_path(indir, exclude_er_map=True)):
             df = pd.read_csv(path, sep=",", low_memory=False)
 
             # Add row column with unique row tokens

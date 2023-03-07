@@ -1,8 +1,6 @@
 import importlib
 
-import pandas as pd
-
-from relational_embeddings.lib.utils import get_sweep_vars, prev_stage_dir
+from relational_embeddings.lib.utils import get_sweep_vars
 
 def downstream(cfg, outdir, indir=None):
     """
@@ -13,11 +11,8 @@ def downstream(cfg, outdir, indir=None):
 
     teefile = outdir / 'results.txt'
 
-    df_x = pd.read_csv(indir / 'embeddings.csv')
-    df_y = pd.read_csv(prev_stage_dir(outdir, "dataset") / "base.csv")[[cfg.dataset.target_column]]
-
     function = get_pipeline_function("downstream", cfg.downstream.task)
-    df = function(df_x, df_y, outdir, cfg.downstream)
+    df = function(outdir, cfg.downstream)
 
     orig_cols = list(df.columns)
     sweep_vars = get_sweep_vars(outdir)

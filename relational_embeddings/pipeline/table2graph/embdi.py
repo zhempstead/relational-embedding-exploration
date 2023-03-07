@@ -14,7 +14,7 @@ def embdi_table2graph(indir, outdir, cfg):
     Build graph embdi-style: value/column/row nodes
     """
     edge_dfs = []
-    for path in tqdm(all_csv_in_path(indir)):
+    for path in tqdm(all_csv_in_path(indir, exclude_er_map=True)):
         df = pd.read_csv(path, sep=",", low_memory=False)
         edge_df = make_edge_df(df)
         edge_df["table"] = path.stem

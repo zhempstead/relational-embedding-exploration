@@ -1,0 +1,4 @@
+method: real
+name: amazon_google
+downstream_task: entity_resolution
+target_column: None 

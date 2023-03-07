@@ -6,7 +6,7 @@ from gensim.models import KeyedVectors
 from relational_embeddings.lib.token_dict import TokenDict
 from relational_embeddings.lib.utils import prev_stage_dir
 
-def cosine_similarity_downstream(df_x, df_y, outdir, cfg):
+def cosine_similarity_downstream(outdir, cfg):
     """
     Variant of classification task where the Y values appear in embeddings. We simply choose the
     Y token with the closest embedding (by cosine similarity) to the row embedding, and score based
@@ -15,6 +15,8 @@ R
     Since this requires the Y tokens to have embeddings it's intended for use in synthetic datasets
     where the Y column is equivalent to one or more "truth" columns.
     """
+    df_x = pd.read_csv(prev_stage_dir(outdir, "model2emb") / "embeddings.csv")
+    df_y = pd.read_csv(prev_stage_dir(outdir, "dataset") / "base.csv")[[cfg.dataset.target_column]]
     teefile = outdir / 'results.txt'
     target_column = df_y.columns[0]
 
