@@ -40,7 +40,7 @@ def metrics_intrinsic(outdir, cfg):
 
     results = {'metric': [], 'table': [], 'col1': [], 'col2': [], 'successes': [], 'total': []}
 
-    for csv in all_csv_in_path(normalize_dir):
+    for csv in all_csv_in_path(normalize_dir, exclude_er_map=True):
         print(f"Evaluating {csv.name}...")
         df = pd.read_csv(csv)
         if len(df.columns) < 2:
@@ -48,9 +48,18 @@ def metrics_intrinsic(outdir, cfg):
             continue
         embs = np.zeros((len(df), len(df.columns), model.vector_size))
         for idx, col in enumerate(df.columns):
-            df[col] = df[col].map(lambda val: word_dict.getNumForToken(val))
-            embs[:, idx, :] = model[df[col]]
-            df[col] = df[col].astype(int)
+            mapped = df[col].map(lambda val: word_dict.getNumForToken(val))
+            na_rows = mapped.isna()
+            embs[~na_rows, idx, :] = model[mapped[~na_rows]]
+            df.loc[~na_rows, col] = mapped[~na_rows].astype(int)
+            # Handle split token rows
+            for row in mapped.index[na_rows]:
+                try:
+                    ids = [word_dict.getNumForToken(val) for val in df.loc[row, col].split()]
+                    embs[row, idx, :] = model[ids].mean(axis=0)
+                except AttributeError:
+                    ids = [-1]
+                df.loc[row, col] = int(ids[0])
         ids = df.to_numpy()
         embs = normalize(embs)
         
@@ -120,12 +129,14 @@ def embdi_match_row(ids, embs, num_good, seed):
 
 def embdi_match_concept(ids, embs, col1, col2, num_good, seed):
     successes = total = 0
-    num_rows, _, dims = embs.shape
+    num_rows, num_cols, dims = embs.shape
 
     argsort = ids[:, col1].argsort()
     ids_sorted = ids[:, (col1, col2)][argsort]
     embs_sorted = embs[:, (col1, col2), :][argsort]
     uniq = np.unique(ids_sorted[:, 0], return_index=True)[1]
+    if len(uniq) < 2:
+        return 0, 0
     col1_embs = embs_sorted[uniq, 0, :]
     col2_emb_groups = np.split(embs_sorted[:, 1, :], uniq[1:])
     for col_id, col1_emb, col2_emb_group in zip(ids_sorted[uniq, 0], col1_embs, col2_emb_groups):
@@ -185,6 +196,8 @@ def analogy_match_concept(ids, embs, col1, col2, num_good, seed):
     ids_sorted = ids[:, (col1, col2)][argsort]
     embs_sorted = embs[:, (col1, col2), :][argsort]
     uniq = np.unique(ids_sorted[:, 0], return_index=True)[1]
+    if len(uniq) < 2:
+        return 0, 0
     col1_embs = embs_sorted[uniq, 0, :]
     col2_emb_groups = np.split(embs_sorted[:, 1, :], uniq[1:])
     col2_emb_avgs = [np.mean(group, axis=0).reshape((1, dims)) for group in col2_emb_groups]
@@ -194,8 +207,8 @@ def analogy_match_concept(ids, embs, col1, col2, num_good, seed):
     for idx in range(len(col1_embs)):
         col2_avg_subset = col2_emb_avgs
         col2_minus_subset = col2_emb_avgs_minus
-        if num_rows > ANALOGY_COMPARE_SIZE:
-            rows = list(range(num_rows))
+        if len(uniq) > ANALOGY_COMPARE_SIZE:
+            rows = list(range(len(uniq)))
             rows.remove(idx)
             sample = seed.choice(rows, ANALOGY_COMPARE_SIZE, replace=False)
             sample = np.concatenate(([idx], sample))
@@ -244,12 +257,14 @@ def pairwise_cosine_similarity(A, B):
 
 def rss(A):
     """
-    Root sum of squares by row
+    Root sum of squares by row, except 0 becomes 1
 
     Input shape (rows, dim)
     Output shape (rows,)
     """
-    return np.sqrt(np.sum(np.square(A), axis=1))
+    res = np.sqrt(np.sum(np.square(A), axis=1))
+    res[np.where(res == 0)] = 1
+    return res
 
 def normalize(A, axis=-1):
     """
