@@ -4,7 +4,25 @@ import sys
 
 import pandas as pd
 
+MAIN_FILE = "downstream_v_intrinsic.csv"
+
 def main(parent_dir):
+    main_file = parent_dir / MAIN_FILE
+    if not main_file.exists():
+        df = gather_results(parent_dir)
+        df.to_csv(main_file, index=False)
+    else:
+        df = pd.read_csv(main_file)
+
+    print(f"pscore_test ranges from {df['pscore_test'].min()} to {df['pscore_test'].max()}")
+    print_corrs(df)
+    for control_cols in [['dimensions'], ['model']]:
+        print(f"Control cols: {control_cols}")
+        for vals, df_subset in df.groupby(control_cols):
+            print(f"  ...for {vals}:")
+            print_corrs(df_subset)
+
+def gather_results(parent_dir):
     experiment_dirs = [d for d in parent_dir.iterdir() if d.is_dir()]
     exp_dfs = []
     for experiment_dir in experiment_dirs:
