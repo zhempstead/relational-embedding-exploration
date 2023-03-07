@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import itertools
 import logging
 from pathlib import Path
+import shutil
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from hydra.types import HydraContext
@@ -96,6 +97,8 @@ class GridsearchSweeper(Sweeper):
             else:
                 key = override.get_key_element()
                 value = override.get_value_element_as_str()
+                if key == "resume_workdir":
+                    shutil.copy(sweep_dir / 'multirun.yaml', value)
                 simple_overrides.append(f"{key}={value}")
 
 
