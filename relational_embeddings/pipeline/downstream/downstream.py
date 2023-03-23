@@ -12,7 +12,7 @@ def downstream(cfg, outdir, indir=None):
     teefile = outdir / 'results.txt'
 
     function = get_pipeline_function("downstream", cfg.downstream.task)
-    df = function(outdir, cfg.downstream)
+    df = function(outdir, cfg)
 
     orig_cols = list(df.columns)
     sweep_vars = get_sweep_vars(outdir)

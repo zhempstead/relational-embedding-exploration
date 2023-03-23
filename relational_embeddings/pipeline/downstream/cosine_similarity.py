@@ -30,8 +30,8 @@ R
     except ValueError:
         model_dir = prev_stage_dir(outdir, "text2model")
     model_fname = "model"
-    if cfg.model_suffix is not None:
-        model_fname += f"_{cfg.model_suffix}"
+    if cfg.downstream.model_suffix is not None:
+        model_fname += f"_{cfg.downstream.model_suffix}"
     model = KeyedVectors.load_word2vec_format(model_dir / model_fname)
     word_dict = TokenDict()
     word_dict.load(model_dir / "word_dict.feather")
