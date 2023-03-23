@@ -145,6 +145,9 @@ def get_subdir(stage: str, overrides: List[Tuple[str, str]]):
         return stage
     subdir = [stage]
     for key, value in overrides:
+        if key == stage:
+            subdir.append(value)
+            continue
         key_prefix, key_suffix = key.split('.', 1)
         if key_prefix == 'global':
             outdir_key = key
