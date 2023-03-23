@@ -7,6 +7,7 @@ seaborn==0.11.1
 pandas==1.1.5
 pyarrow
 scikit-learn==1.1.2
+tabulate
 tensorflow>=2.4.1
 hydra-core==1.2
 hydra-joblib-launcher
